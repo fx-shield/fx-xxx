@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FX shield ４種の神器 徹底解説</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #eab308;
+            --bg: #020617;
+            --card: #1e293b;
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #3b82f6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #000;
+            font-family: 'Noto Sans JP', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slides-wrapper {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            flex: 0 0 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--bg);
+            border-right: 1px solid #333;
+        }
+
+        h1 { font-size: 28px; color: var(--gold); margin-bottom: 10px; text-align: center; }
+        h2 { font-size: 22px; color: var(--gold); margin-bottom: 15px; border-bottom: 2px solid var(--gold); padding-bottom: 8px; width: 100%; max-width: 600px; text-align: center; }
+        
+        .box {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        .visual-area {
+            width: 100%;
+            max-width: 600px;
+            height: 280px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .highlight { color: var(--gold); font-weight: bold; }
+        .text-small { font-size: 13px; color: #cbd5e1; line-height: 1.4; }
+        
+        .badge { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 5px; font-weight: bold; margin-right: 5px; font-size: 12px; }
+
+        /* アニメーション */
+        .nav-hint { position: absolute; bottom: 20px; color: var(--gold); font-size: 12px; animation: slideIn 2s infinite; }
+        @keyframes slideIn { 0% {transform: translateX(0); opacity: 0.5;} 50% {transform: translateX(10px); opacity: 1;} 100% {transform: translateX(0); opacity: 0.5;} }
+
+        /* 図解パーツ */
+        .trend-line { stroke-width: 4; fill: none; }
+        .support-line { stroke: var(--gold); stroke-width: 2; stroke-dasharray: 5; }
+        .ma-line { stroke: var(--gold); stroke-width: 3; fill: none; opacity: 0.8; }
+        .price-action { stroke: #fff; stroke-width: 3; fill: none; }
+
+        /* 特典ボタン（ここがリンクになります） */
+        .gift-btn {
+            background: linear-gradient(to right, #eab308, #fbbf24);
+            color: #000;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 20px;
+            display: inline-block;
+            font-size: 18px;
+            box-shadow: 0 4px 20px rgba(234, 179, 8, 0.5);
+            transition: transform 0.2s;
+        }
+        .gift-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div class="slides-wrapper">
+
+    <!-- 1. 表紙 -->
+    <div class="slide">
+        <div style="font-size: 60px; margin-bottom: 10px;">🛡️</div>
+        <h1>FX shield</h1>
+        <h1 style="font-size: 34px;">４種の神器 徹底解説</h1>
+        <div class="box" style="text-align: center;">
+            <p>【公式LINE限定公開】</p>
+            <p class="highlight">プロが見ている景色の正体</p>
+        </div>
+        <p style="color: #64748b; font-size: 12px;">右へスワイプでスタート ＞</p>
+    </div>
+
+    <!-- 2. ダウ理論（基礎） -->
+    <div class="slide">
+        <h2>① ダウ理論（トレンド判断）</h2>
+        <div class="box">
+            <p><span class="badge">基本</span> 安値と高値の両方が切り上がれば上昇</p>
+            <p class="text-small">この形が出ている間は、売りは一切考えず「押し目買い」だけに集中します。</p>
+        </div>
+        <div class="visual-area">
+            <svg width="300" height="150" viewBox="0 0 300 150">
+                <polyline points="20,130 70,70 110,100 170,40 210,80 280,20" class="trend-line" stroke="#22c55e" />
+                <circle cx="20" cy="130" r="5" fill="#fff" />
+                <circle cx="110" cy="100" r="5" fill="#fff" />
+                <circle cx="210" cy="80" r="5" fill="#fff" />
+                <text x="210" y="110" fill="#fff" font-size="10">安値が切り上がる</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 3. ダウ理論（転換） -->
+    <div class="slide">
+        <h2>① ダウ理論（トレンド転換）</h2>
+        <div class="box">
+            <p><span class="badge">重要</span> 押し安値を割ったらトレンド終了</p>
+            <p class="text-small">最後に高値を更新した起点の安値。ここを下に抜けると、買いの優位性が消滅します。</p>
+        </div>
+        <div class="visual-area">
+            <svg width="300" height="200" viewBox="0 0 300 200">
+                <polyline points="40,160 100,60 150,110 220,30 280,180" class="trend-line" stroke="#ef4444" />
+                <line x1="130" y1="110" x2="300" y2="110" class="support-line" />
+                <circle cx="150" cy="110" r="8" fill="#eab308" />
+                <text x="130" y="135" fill="#eab308" font-size="12">押し安値をブレイク！</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 4. エリオット波動 -->
+    <div class="slide">
+        <h2>エリオット波動（波の性質）</h2>
+        <div class="box">
+            <p><span class="badge">利益</span> 狙うは最も伸びる「第3波」</p>
+            <p class="text-small">1波でトレンド転換を確認し、2波の調整を経て、3波の爆発を狙い撃ちます。</p>
+        </div>
+        <div class="visual-area">
+            <svg width="300" height="150" viewBox="0 0 300 150">
+                <polyline points="30,130 90,70 130,110 240,20 280,60" class="trend-line" stroke="#3b82f6" />
+                <text x="50" y="100" fill="#fff" font-size="10">1波</text>
+                <text x="100" y="100" fill="#fff" font-size="10">2波</text>
+                <text x="160" y="60" fill="#3b82f6" font-size="18" font-weight="bold">最強の3波</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 5. 水平線 -->
+    <div class="slide">
+        <h2>② 水平線（レジサポ転換）</h2>
+        <div class="box">
+            <p><span class="badge">手法</span> 壁が役割を変える瞬間を狙う</p>
+            <p class="text-small">天井だった線が、抜けた後は床に変わる。ここが最も損切りを浅くできるポイントです。</p>
+        </div>
+        <div class="visual-area">
+            <svg width="300" height="150" viewBox="0 0 300 150">
+                <line x1="0" y1="75" x2="300" y2="75" class="ma-line" style="stroke-dasharray: 0; opacity: 1;" />
+                <polyline points="20,140 80,80 130,130 200,60 250,75 290,10" class="price-action" />
+                <circle cx="250" cy="75" r="10" fill="none" stroke="#22c55e" stroke-width="3" />
+                <text x="200" y="100" fill="#22c55e" font-size="12">サポートに変化！</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 6. 移動平均線 -->
+    <div class="slide">
+        <h2>③ 移動平均線 (MA)</h2>
+        <div class="box">
+            <p><span class="badge">指標</span> MAがサポーターになる</p>
+            <p class="text-small">角度のある20MAや200MAに価格が近づき、反発する動きを確認します。</p>
+        </div>
+        <div class="visual-area">
+            <svg width="300" height="150" viewBox="0 0 300 150">
+                <path d="M 0 130 Q 150 130 300 30" class="ma-line" />
+                <polyline points="20,110 80,90 140,120 200,70 260,80 300,10" class="price-action" />
+                <circle cx="140" cy="120" r="8" fill="none" stroke="#eab308" stroke-width="2" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- 7. グランビルの法則 -->
+    <div class="slide">
+        <h2>③ グランビル（買いのサイン）</h2>
+        <div class="box">
+            <p><span class="badge">鉄板</span> MA付近での反発を確認</p>
+            <p class="text-small">MAを一度抜けてから、再度MAに向かってきて反発する「押し目買い」が最強です。</p>
+        </div>
+        <div class="visual-area">
+            <svg width="300" height="150" viewBox="0 0 300 150">
+                <path d="M 0 100 Q 150 100 300 50" class="ma-line" />
+                <polyline points="0,140 100,50 180,110 250,80 300,10" class="price-action" />
+                <circle cx="180" cy="110" r="10" fill="none" stroke="#22c55e" stroke-width="3" />
+                <text x="140" y="140" fill="#22c55e" font-size="12">ここが買い場！</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 8. マルチタイムフレーム -->
+    <div class="slide">
+        <h2>④ マルチタイムフレーム(MTF)</h2>
+        <div class="box">
+            <p><span class="badge">環境</span> 大きな波に逆らわない</p>
+            <p class="text-small">上位足が上昇トレンド中に、下位足で「形」が整った時だけエントリーします。</p>
+        </div>
+        <div class="visual-area">
+            <div style="text-align: center;">
+                <div style="border: 1px solid var(--gold); padding: 5px; border-radius: 5px; margin-bottom: 10px;">日足：上昇中 ⤴️</div>
+                <div style="font-size: 20px;">＋</div>
+                <div style="border: 1px solid var(--green); padding: 5px; border-radius: 5px; margin-top: 10px;">15分足：押し目買い ⤴️</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. ４種の神器の合流 -->
+    <div class="slide">
+        <h2>黄金のエントリー条件</h2>
+        <div class="box" style="background: rgba(34, 197, 94, 0.1);">
+            <p class="highlight" style="text-align: center; margin-bottom: 10px;">全てが重なる時、勝率は最大化する</p>
+            <p style="font-size: 14px;">1. 長期足の方向に (MTF)<br>2. 押し安値を割らずに (ダウ)<br>3. 水平線の反発を確認し (水平線)<br>4. MAに引きつけて買う (グランビル)</p>
+        </div>
+        <div style="font-size: 50px;">🎯💰✨</div>
+    </div>
+
+    <!-- 10. Gmail誘導 -->
+    <div class="slide">
+        <h2 style="border: none; font-size: 26px;">🎁 さらに詳しいPDFはこちら</h2>
+        <div class="box">
+            <p>スライドでは語り尽くせなかった</p>
+            <p class="highlight" style="font-size: 20px;">『FX shield 完全マニュアル』</p>
+            <p>をGmail限定でプレゼント！</p>
+        </div>
+        
+        <div style="text-align: left; width: 85%; margin-bottom: 20px;">
+            <p class="text-small">・具体的な利確と損切りの数値<br>・XMのボーナスを最大化する手法<br>・フォレックステスターでの練習法</p>
+        </div>
+
+        <!-- リンク先を自分のGmail登録ページに書き換えてください -->
+        <a href="https://your-gmail-registration-page.com" class="gift-btn">PDFを無料で受け取る</a>
+        
+        <p style="margin-top: 20px; font-size: 11px; color: #888;">※ボタンを押すと外部サイトへ移動します</p>
+    </div>
+
+</div>
+
+</body>
+</html>
