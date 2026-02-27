@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FX SHIELD｜無料添削</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont; background:#f1f5f9; margin:0; }
+    .wrap { max-width:420px; margin:auto; background:#fff; min-height:100vh; }
+    header { background:#0f172a; color:#fff; padding:24px; text-align:center; border-bottom:4px solid #facc15; }
+    h1 { margin:0; color:#facc15; font-weight:900; }
+    main { padding:16px; }
+    .box { background:#f8fafc; border:1px solid #e5e7eb; border-radius:16px; padding:12px; margin-bottom:12px; }
+    input, select, textarea, button {
+      width:100%; padding:12px; border-radius:12px; border:1px solid #e5e7eb; font-weight:bold;
+    }
+    button { background:#2563eb; color:#fff; border:none; margin-top:12px; }
+    button:disabled { background:#cbd5f5; }
+    .total { text-align:center; font-size:28px; font-weight:900; margin-top:8px; }
+    footer { text-align:center; padding:12px; font-size:10px; color:#aaa; }
+    .row { display:flex; justify-content:space-between; font-size:12px; margin:6px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>FX SHIELD</h1>
+      <div style="font-size:10px; opacity:.7;">TECHNICAL MENTOR SUPPORT</div>
+    </header>
+
+    <main>
+      <!-- ① ロット入力 -->
+      <div class="box">
+        <p>① ロット入力（合計1.00Lotで条件達成）</p>
+        <select id="type">
+          <option value="1">FX通貨ペア / GOLD / SILVER</option>
+          <option value="0.1">OIL（原油）</option>
+          <option value="0.1">ビットコイン（BTC）</option>
+          <option value="0.01">イーサリアム（ETH）</option>
+          <option value="0.01">指数（ダウ / ナス / 日経 など）</option>
+        </select>
+        <input id="lots" type="number" placeholder="ロット数（例: 0.5）" min="0" step="0.01"/>
+        <button onclick="add()">追加</button>
+        <div id="list"></div>
+        <div class="total" id="total">0.00 / 1.00 Lot</div>
+      </div>
+
+      <!-- ② 添削フォーム -->
+      <div class="box">
+        <p>② 添削フォーム（条件達成でコピー可）</p>
+        <input id="uid" placeholder="XM ユーザーID"/>
+        <input id="target" placeholder="銘柄"/>
+        <input id="tf" placeholder="時間足（例: 1H）"/>
+        <textarea id="reason" rows="4" placeholder="エントリー根拠"></textarea>
+        <input id="sl" placeholder="SL"/>
+        <input id="tp" placeholder="TP"/>
+        <button id="copyBtn" onclick="copyText()" disabled>依頼文をコピー</button>
+      </div>
+    </main>
+
+    <footer>© FX SHIELD Mentor System</footer>
+  </div>
+
+<script>
+  let trades = [];
+
+  function getTypeLabel(type) {
+    if (type === 1) return "FX通貨ペア / GOLD / SILVER";
+    if (type === 0.1) return "OIL（原油） / BTC";
+    if (type === 0.01) return "ETH / 指数（ダウ / ナス / 日経 など）";
+    return "その他";
+  }
+
+  function calc() {
+    let sum = 0;
+    trades.forEach(t => sum += t.lots * t.type);
+    if (sum > 1) sum = 1;
+    document.getElementById("total").innerText = sum.toFixed(2) + " / 1.00 Lot";
+    document.getElementById("copyBtn").disabled = sum < 1;
+  }
+
+  function add() {
+    const type = parseFloat(document.getElementById("type").value);
+    const lots = parseFloat(document.getElementById("lots").value);
+
+    if (!lots || lots <= 0) {
+      alert("ロット数を正しく入力してな");
+      return;
+    }
+
+    trades.push({type, lots});
+    document.getElementById("list").innerHTML += 
+      `<div class="row"><span>${getTypeLabel(type)}</span><span>${lots} Lot</span></div>`;
+    document.getElementById("lots").value = "";
+    calc();
+  }
+
+  function copyText() {
+    let breakdown = "";
+    trades.forEach(t => {
+      breakdown += `・${getTypeLabel(t.type)}：${t.lots} Lot\n`;
+    });
+
+    let msg =
+`🎯 添削依頼（条件達成済） 🎯
+
+【ID】${uid.value || "未入力"}
+【達成状況】1.00 Lot 相当（達成済）
+
+【取引内訳】
+${breakdown}
+
+【対象銘柄】${target.value || "未入力"}
+【使用した時間足】${tf.value || "未入力"}
+
+【4種の神器（環境認識・根拠）】
+${reason.value || "特になし"}
+
+【SL / TP】
+SL：${sl.value || "-"} / TP：${tp.value || "-"}
+
+※この後、分析画像を添えてLINEで送信します！`;
+
+    navigator.clipboard.writeText(msg);
+    alert("コピーできました！そのままLINEに貼り付けて送ってね👌");
+  }
+</script>
+</body>
+</html>
