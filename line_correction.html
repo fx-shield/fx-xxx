@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FXシールド公式LINE 添削依頼フォーム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f1f5f9; }
+        .form-card { border-radius: 1.5rem; }
+        .important-box { border-left: 4px solid #ef4444; }
+        .btn-copy { transition: all 0.3s ease; }
+        .btn-copy:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-md mx-auto bg-white shadow-2xl form-card overflow-hidden">
+        <!-- Header -->
+        <div class="bg-indigo-700 p-6 text-white text-center">
+            <h1 class="text-xl font-bold">💎 【限定30名】💎<br>FXシールド公式LINE 添削提出フォーム</h1>
+        </div>
+
+        <!-- 重要事項エリア -->
+        <div class="p-5 bg-red-50 border-b border-red-100">
+            <h2 class="text-sm font-bold text-red-700 mb-2 flex items-center">
+                <span class="mr-2">⚠️</span> 添削に関する重要事項
+            </h2>
+            <ul class="text-[11px] text-red-800 space-y-2 leading-relaxed">
+                <li>● <strong>対象スタイル：</strong> 本添削は<strong>「デイトレード」</strong>のみが対象です。</li>
+                <li>● <strong>手法の限定：</strong> 私が推奨する<strong>「4種の神器（水平線・ダウ理論・MA・MTF分析）」</strong>に基づいた順張り手法のみ添削します。</li>
+                <li>● 逆張りやスキャルピング等の添削は受け付けておりませんので、ご了承ください。</li>
+                <li>● <strong>自己責任の原則：</strong> 最終的なエントリー判断は自己責任でお願いいたします。</li>
+            </ul>
+        </div>
+
+        <!-- Form Section -->
+        <div class="p-6 space-y-6">
+            <!-- 名前/ペンネーム -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">お名前（ペンネーム可）</label>
+                <input type="text" id="userName" placeholder="例：シールド太郎" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">1. 通貨ペア / トレード時間帯</label>
+                <input type="text" id="pairTime" placeholder="例：USD/JPY / 21:30頃" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">2. エントリー根拠（4種の神器）</label>
+                <textarea id="basis" rows="3" placeholder="水平線、ダウ理論、MA、MTF分析をどう使ったか記入してください。" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">3. エントリー時の懸念点・リスク</label>
+                <textarea id="risk" rows="2" placeholder="上位足の抵抗が近い、ボラが低い等、気になったリスクを記入してください。" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">4. エントリー、利確、損切り</label>
+                    <p class="text-[10px] text-red-500 mb-1 font-bold leading-tight underline">※必ずチャートに書き込んでください。</p>
+                    <input type="text" id="tpsl" placeholder="（例：チャートに記載済）" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">5. リスクリワード比</label>
+                    <p class="text-[10px] text-red-500 mb-1 font-bold leading-tight underline">※必ずチャートに書き込んでください。</p>
+                    <input type="text" id="rr" placeholder="例 1：1.5" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">6. 反省点・疑問点</label>
+                <textarea id="analysis" rows="3" placeholder="自分なりの自己分析を書いてください。" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+            </div>
+
+            <!-- Image Checklist -->
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <p class="text-xs font-bold text-indigo-700 mb-2 font-bold leading-tight">📸 チャート画像添付チェックリスト（必須）</p>
+                <ul class="text-[10px] text-indigo-600 space-y-1 list-disc ml-4 font-bold">
+                    <li>日足・4時間足・1時間足のチャートは必須</li>
+                    <li>15分足（使用した場合）</li>
+                    <li>エントリー位置、損切り、リワードの線をチャートに書き込んだ（スマホ機能で可）</li>
+                </ul>
+            </div>
+
+            <!-- Copy Button -->
+            <div class="space-y-3">
+                <button onclick="copyToClipboard()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl btn-copy hover:bg-indigo-700 shadow-lg flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    <span>内容をコピーしてLINEに送る</span>
+                </button>
+                <p id="statusMsg" class="text-center text-xs font-bold text-green-600 hidden">コピー完了！LINEに戻って貼り付けてください。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const userName = document.getElementById('userName').value || "未記入";
+            const pairTime = document.getElementById('pairTime').value;
+            const basis = document.getElementById('basis').value;
+            const risk = document.getElementById('risk').value;
+            const tpsl = document.getElementById('tpsl').value;
+            const rr = document.getElementById('rr').value;
+            const analysis = document.getElementById('analysis').value;
+
+            const text = `【添削依頼：FXシールド公式LINE】
+
+お名前（ペンネーム）：
+➔ ${userName}
+
+1. 通貨ペア / トレード時間帯：
+➔ ${pairTime}
+
+2. エントリー根拠（4種の神器）：
+➔ ${basis}
+
+3. エントリー時の懸念点・リスク：
+➔ ${risk}
+
+4. エントリー、利確、損切り：
+➔ ${tpsl}
+（※必ずチャートに書き込んでください）
+
+5. リスクリワード比：
+➔ ${rr}
+（※必ずチャートに書き込んでください）
+
+6. 自分なりの反省点・疑問点：
+➔ ${analysis}
+
+---
+【確認事項】
+・エントリー、損切り、リワードの線をチャートに書き込みましたか？
+・日足〜1時間のチャートを準備しましたか？
+
+※この後にチャート画像を添付して送信します！
+※「注意事項を確認・同意の上で依頼しています」`;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                const msg = document.getElementById('statusMsg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 5000);
+            } catch (err) {
+                console.error('コピーに失敗しました', err);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+    </script>
+</body>
+</html>
