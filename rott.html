@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FX Shield - ロット計算ツール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 丸みのあるモダンな日本語・英語フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* 深みのある紫パールのグラデーション */
+            background: radial-gradient(circle at 20% 20%, #4c1d95 0%, #2e1065 30%, #1e1b4b 70%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* パールのような輝きのエフェクト */
+        body::before {
+            content: "";
+            width: 200%;
+            height: 200%;
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, transparent 60%);
+            animation: pearlMove 15s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pearlMove {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(10%, 10%); }
+        }
+
+        .logo-text {
+            font-family: 'Outfit', 'M PLUS Rounded 1c', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-card {
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(196, 181, 253, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .input-card:focus-within {
+            border-color: #c084fc;
+            background-color: rgba(46, 16, 101, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .result-gradient {
+            background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+            border: 2px solid #ddd6fe;
+            box-shadow: 0 15px 45px -10px rgba(139, 92, 246, 0.7);
+            position: relative;
+        }
+
+        /* 真珠の光沢のようなハイライト */
+        .result-gradient::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.1) 55%, transparent 70%);
+            pointer-events: none;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ddd6fe'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            background: #f5f3ff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(196, 181, 253, 1);
+            border: 2px solid #8b5cf6;
+        }
+
+        .affiliate-link {
+            transition: all 0.2s ease;
+        }
+        .affiliate-link:hover {
+            background-color: rgba(139, 92, 246, 0.2);
+            border-color: rgba(196, 181, 253, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center relative">
+
+    <div class="w-full max-w-md mx-auto relative z-10">
+        <!-- ヘッダー -->
+        <div class="text-center mb-8">
+            <h1 class="logo-text text-5xl font-black text-white mb-1 drop-shadow-2xl">FX Shield</h1>
+            <p class="text-purple-200 font-bold text-xs tracking-[0.2em] uppercase opacity-90">最強の資金管理ツール</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- 取引銘柄選択 -->
+            <div class="input-card p-4 rounded-3xl">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">取引銘柄</label>
+                <select id="symbol" onchange="calculate()" class="w-full bg-transparent text-xl font-bold text-white outline-none cursor-pointer">
+                    <optgroup label="FX - 円絡み" class="bg-[#1e1b4b]">
+                        <option value="jpy">ドル円 (USDJPY)</option>
+                        <option value="jpy">ユーロ円 (EURJPY)</option>
+                        <option value="jpy">ポンド円 (GBPJPY)</option>
+                        <option value="jpy">オージー円 (AUDJPY)</option>
+                        <option value="jpy">カナダ円 (CADJPY)</option>
+                    </optgroup>
+                    <optgroup label="FX - ドル・ユーロ絡み" class="bg-[#1e1b4b]">
+                        <option value="usd">ポンドドル (GBPUSD)</option>
+                        <option value="usd">オージードル (AUDUSD)</option>
+                        <option value="usd">ユーロドル (EURUSD)</option>
+                        <option value="usd">ドルカナダ (USDCAD)</option>
+                        <option value="usd">ドルスイス (USDCHF)</option>
+                        <option value="eur">ユーロポンド (EURGBP)</option>
+                    </optgroup>
+                    <optgroup label="貴金属・エネルギー" class="bg-[#1e1b4b]">
+                        <option value="gold">ゴールド (XAUUSD)</option>
+                        <option value="silver">シルバー (XAGUSD)</option>
+                        <option value="oil">原油 (OIL/WTI)</option>
+                    </optgroup>
+                    <optgroup label="株価指数" class="bg-[#1e1b4b]">
+                        <option value="jpy_index">日経平均 (JPN225)</option>
+                        <option value="usd_index">ナスダック (NAS100)</option>
+                        <option value="usd_index_sp">SP500 (US500)</option>
+                        <option value="usd_index">NYダウ (US30)</option>
+                    </optgroup>
+                    <optgroup label="仮想通貨" class="bg-[#1e1b4b]">
+                        <option value="crypto_btc">ビットコイン (BTCUSD)</option>
+                        <option value="crypto_eth">イーサリアム (ETHUSD)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <!-- 資金設定 -->
+            <div class="input-card p-4 rounded-3xl">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">口座残高 (円)</label>
+                <input type="number" id="balance" value="100000" oninput="calculate()"
+                    class="w-full bg-transparent text-2xl font-bold text-white outline-none">
+            </div>
+
+            <!-- リスク設定 -->
+            <div class="input-card p-4 rounded-3xl">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-[11px] font-black text-purple-200 uppercase tracking-widest ml-1 italic">許容リスク (%)</label>
+                    <span id="risk-percent-display" class="text-white font-black bg-purple-700 px-3 py-1 rounded-full text-sm shadow-inner">2.0%</span>
+                </div>
+                <input type="range" id="risk-percent" min="0.5" max="10" step="0.5" value="2" oninput="updateRiskDisplay()"
+                    class="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-300 mt-2">
+            </div>
+
+            <!-- 価格から損切り幅を計算するセクション -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="input-card p-4 rounded-3xl">
+                    <label class="block text-[10px] font-black text-purple-200 mb-1 uppercase tracking-widest italic opacity-80 text-center">エントリー価格</label>
+                    <input type="number" id="entry-price" step="0.01" placeholder="価格を入力" oninput="calcPipsFromPrice()"
+                        class="w-full bg-transparent text-lg font-bold text-white outline-none text-center">
+                </div>
+                <div class="input-card p-4 rounded-3xl">
+                    <label class="block text-[10px] font-black text-purple-200 mb-1 uppercase tracking-widest italic opacity-80 text-center">損切り価格</label>
+                    <input type="number" id="stop-price" step="0.01" placeholder="価格を入力" oninput="calcPipsFromPrice()"
+                        class="w-full bg-transparent text-lg font-bold text-white outline-none text-center">
+                </div>
+            </div>
+
+            <!-- 損切り幅設定 -->
+            <div class="input-card p-4 rounded-3xl">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">損切り値幅（自動計算）</label>
+                <div class="flex items-center">
+                    <input type="number" id="pips" value="20" oninput="calculate()"
+                        class="w-full bg-transparent text-2xl font-bold text-white outline-none">
+                    <span id="unit-text" class="text-purple-200 font-black ml-2 text-sm italic">PIPS</span>
+                </div>
+            </div>
+
+            <!-- 計算結果 -->
+            <div class="result-gradient p-7 rounded-[2.5rem] shadow-2xl relative overflow-hidden mt-6">
+                <div class="relative z-10 text-center">
+                    <p class="text-[12px] font-black text-purple-100 uppercase tracking-[0.2em] mb-1 opacity-90">推奨エントリーロット</p>
+                    <h2 id="result-lots" class="text-6xl font-black text-white tracking-tighter logo-text py-2">0.10 <span class="text-2xl font-bold opacity-80">lots</span></h2>
+                    
+                    <div class="grid grid-cols-2 gap-4 border-t border-white/20 mt-6 pt-5">
+                        <div class="text-left">
+                            <p class="text-[10px] font-black text-purple-200/80 uppercase mb-1 italic">許容損失額</p>
+                            <p id="result-money" class="text-xl font-black text-white">¥2,000</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-purple-200/80 uppercase mb-1 italic">値幅あたりの価値</p>
+                            <p id="result-pips-value" class="text-xl font-black text-white">¥100</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 装飾背景 -->
+                <div class="absolute -right-8 -bottom-8 opacity-[0.2] pointer-events-none text-white">
+                    <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                </div>
+            </div>
+
+            <!-- ドル円レート入力 -->
+            <div id="usd-rate-container" class="hidden input-card p-4 rounded-3xl border-purple-400/30">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">現在のドル円レート</label>
+                <input type="number" id="usd-jpy" value="150.00" oninput="calculate()"
+                    class="w-full bg-transparent text-xl font-bold text-white outline-none">
+            </div>
+
+            <!-- アフィリエイトリンクセクション -->
+            <div class="pt-6 pb-12 space-y-2">
+                <label class="block text-[11px] font-black text-purple-300 mb-2 uppercase tracking-[0.3em] text-center italic">Official Links</label>
+                
+                <div class="grid grid-cols-1 gap-2">
+                    <a href="https://clicks.affstrack.com/c?c=1084906&l=en&p=1" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">XM リアル口座</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                    <a href="https://clicks.affstrack.com/c?c=1084906&l=en&p=22" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">XM 追加口座</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                    <a href="https://www.forextester.com/idevaffiliate/idevaffiliate.php?id=17940_20_3_36" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">フォレックステスター オンライン版</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                    <a href="https://www.forextester.com/idevaffiliate/idevaffiliate.php?id=17940_5_3_11" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">フォレックステスター 通常版</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateRiskDisplay() {
+            const risk = document.getElementById('risk-percent').value;
+            document.getElementById('risk-percent-display').innerText = parseFloat(risk).toFixed(1) + '%';
+            calculate();
+        }
+
+        // 価格から損切り幅を計算する関数
+        function calcPipsFromPrice() {
+            const entry = parseFloat(document.getElementById('entry-price').value);
+            const stop = parseFloat(document.getElementById('stop-price').value);
+            const symbol = document.getElementById('symbol').value;
+            
+            if (!isNaN(entry) && !isNaN(stop)) {
+                let diff = Math.abs(entry - stop);
+                let pipsResult = 0;
+
+                // 銘柄ごとのPIPS/ポイント換算ロジック
+                if (symbol === 'jpy' || symbol === 'jpy_index') {
+                    pipsResult = diff * 100; // 0.01が1pips相当
+                } else if (symbol === 'usd' || symbol === 'eur') {
+                    pipsResult = diff * 10000; // 0.0001が1pips相当
+                } else {
+                    // ゴールド、シルバー、オイル、インデックス（US系）、仮想通貨は差分をそのままポイントとして扱う
+                    pipsResult = diff;
+                }
+
+                document.getElementById('pips').value = parseFloat(pipsResult.toFixed(2));
+                calculate();
+            }
+        }
+
+        function calculate() {
+            const balance = parseFloat(document.getElementById('balance').value) || 0;
+            const riskPercent = parseFloat(document.getElementById('risk-percent').value) || 0;
+            const pips = parseFloat(document.getElementById('pips').value) || 0;
+            const symbol = document.getElementById('symbol').value;
+            const usdjpy = parseFloat(document.getElementById('usd-jpy').value) || 150;
+
+            const rateContainer = document.getElementById('usd-rate-container');
+            const unitText = document.getElementById('unit-text');
+
+            const isUsdBased = (symbol === 'usd' || symbol === 'gold' || symbol === 'silver' || symbol === 'usd_index' || symbol === 'usd_index_sp' || symbol === 'oil' || symbol === 'crypto_btc' || symbol === 'crypto_eth');
+            if (isUsdBased) {
+                rateContainer.classList.remove('hidden');
+            } else {
+                rateContainer.classList.add('hidden');
+            }
+
+            if (symbol.includes('index') || symbol === 'gold' || symbol === 'oil' || symbol.includes('crypto')) {
+                unitText.innerText = "POINTS";
+            } else {
+                unitText.innerText = "PIPS";
+            }
+
+            if (balance <= 0 || pips <= 0) return;
+
+            const lossAmount = balance * (riskPercent / 100);
+            let valuePerUnitInJPY = 0;
+
+            // 各銘柄の1ロットあたり、かつ1単位（1pips/1point）動いた時の価値（円）
+            switch(symbol) {
+                case 'jpy': valuePerUnitInJPY = 1000; break;
+                case 'usd': valuePerUnitInJPY = 10 * usdjpy; break;
+                case 'eur': valuePerUnitInJPY = 10 * (usdjpy * 1.2); break;
+                case 'gold': valuePerUnitInJPY = 1 * usdjpy; break; // 100ozロットで1ドル動くと100ドル（1ポイント=1ドル幅）
+                case 'silver': valuePerUnitInJPY = 50 * usdjpy; break; // 5000ozロットで1ドル動くと5000ドル (1ポイント=1ドル幅)
+                case 'oil': valuePerUnitInJPY = 10 * usdjpy; break; // 1000バレルで0.01ドル動くと10ドル
+                case 'jpy_index': valuePerUnitInJPY = 1; break; // 1円動くと1円(1ロット単位)
+                case 'usd_index': valuePerUnitInJPY = 1 * usdjpy; break; // 1ドル動くと1ドル
+                case 'usd_index_sp': valuePerUnitInJPY = 10 * usdjpy; break; // SP500は1ポイント=10ドル価値が多い(XM基準)
+                case 'crypto_btc': valuePerUnitInJPY = 1 * usdjpy; break; // 1ロット1BTCで1ドル動くと1ドル
+                case 'crypto_eth': valuePerUnitInJPY = 1 * usdjpy; break; // 1ロット1ETHで1ドル動くと1ドル
+            }
+
+            let lots = lossAmount / (valuePerUnitInJPY * pips);
+            lots = Math.floor(lots * 100) / 100;
+
+            document.getElementById('result-lots').innerHTML = lots.toFixed(2) + ' <span class="text-2xl font-bold opacity-80 ml-1">lots</span>';
+            document.getElementById('result-money').innerText = '¥' + Math.floor(lossAmount).toLocaleString();
+            document.getElementById('result-pips-value').innerText = '¥' + Math.floor(lossAmount / pips).toLocaleString();
+        }
+
+        window.onload = calculate;
+    </script>
+</body>
+</html>
