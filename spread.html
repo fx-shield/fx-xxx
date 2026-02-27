@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FX SHIELD | 計算機</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --shield-bg: #020617;
+            --shield-blue: #0ea5e9;
+        }
+        body { 
+            background-color: var(--shield-bg); 
+            color: #f8fafc; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            touch-action: manipulation;
+        }
+        .shield-card { 
+            background: linear-gradient(145deg, #0f172a 0%, #020617 100%);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .active-mode {
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            color: white !important;
+            border-color: #38bdf8 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
+        }
+        .input-field {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            border-color: var(--shield-blue) !important;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+        }
+        .btn-animate:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="p-4 min-h-screen flex items-center justify-center">
+
+    <div class="w-full max-w-md space-y-5">
+        <!-- ヘッダー -->
+        <div class="text-center space-y-1">
+            <h1 class="text-3xl font-black italic tracking-tighter text-white flex justify-center items-center gap-2">
+                <svg class="w-8 h-8 text-sky-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                FX SHIELD
+            </h1>
+            <p class="text-sky-500/60 text-[11px] font-bold tracking-[0.2em]">高精度トレード計算機</p>
+        </div>
+
+        <div class="shield-card rounded-[2.5rem] p-6 space-y-5">
+            
+            <!-- 1. 銘柄選択 -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                    <label class="text-[12px] font-black text-slate-400">1. 銘柄タイプを選択</label>
+                    <span id="modeBadge" class="text-[10px] bg-sky-500/20 text-sky-400 px-3 py-1 rounded-full font-bold truncate max-w-[140px] text-center">ドル円 / クロス円</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setMode('jpy')" id="btn-jpy" class="mode-btn active-mode p-2.5 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate">
+                        <span class="text-[11px] font-bold">ドル円 / クロス円</span>
+                    </button>
+                    <button onclick="setMode('usd')" id="btn-usd" class="mode-btn p-2.5 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate">
+                        <span class="text-[11px] font-bold">ドルストレート</span>
+                    </button>
+                    <button onclick="setMode('gold')" id="btn-gold" class="mode-btn p-2.5 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate">
+                        <span class="text-[11px] font-bold">ゴールド (金)</span>
+                    </button>
+                    <button onclick="setMode('silver')" id="btn-silver" class="mode-btn p-2.5 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate">
+                        <span class="text-[11px] font-bold">シルバー (銀)</span>
+                    </button>
+                    <button onclick="setMode('nikkei')" id="btn-nikkei" class="mode-btn p-2.5 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate">
+                        <span class="text-[11px] font-bold">日経平均 (日本)</span>
+                    </button>
+                    <button onclick="setMode('us_index')" id="btn-us_index" class="mode-btn p-2 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate leading-tight">
+                        <span class="text-[10px] font-bold">米国指数</span>
+                        <span class="text-[8px] font-normal opacity-80 mt-0.5">SP500/ダウ/ナス</span>
+                    </button>
+                    <button onclick="setMode('oil')" id="btn-oil" class="mode-btn p-2.5 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate">
+                        <span class="text-[11px] font-bold">原油 (OIL)</span>
+                    </button>
+                    <button onclick="setMode('crypto')" id="btn-crypto" class="mode-btn p-2 rounded-xl flex flex-col items-center justify-center border border-slate-700 text-slate-400 transition-all btn-animate leading-tight">
+                        <span class="text-[10px] font-bold">仮想通貨</span>
+                        <span class="text-[8px] font-normal opacity-80 mt-0.5">BTC / ETH</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. 入力エリア -->
+            <div class="space-y-3">
+                <div class="space-y-2">
+                    <label class="text-[12px] font-black text-slate-400 ml-1">2. スプレッド (MT4のポイント表示)</label>
+                    <input type="number" id="spreadInput" placeholder="例: 20" oninput="runCalc()" class="input-field w-full p-3.5 rounded-2xl text-lg font-bold outline-none text-white">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[12px] font-black text-slate-400 ml-1">3. 狙いたい水平線の価格</label>
+                    <input type="number" id="priceInput" step="0.001" placeholder="例: 145.500" oninput="runCalc()" class="input-field w-full p-3.5 rounded-2xl text-lg font-bold outline-none text-white">
+                </div>
+            </div>
+
+            <!-- 3. 結果表示 -->
+            <div class="pt-1 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-3xl text-center">
+                        <span class="text-[11px] font-black text-emerald-500 block mb-1">買い指値</span>
+                        <div id="buyOut" class="text-2xl font-black text-white tracking-tighter">---</div>
+                    </div>
+                    <div class="bg-rose-500/5 border border-rose-500/20 p-4 rounded-3xl text-center">
+                        <span class="text-[11px] font-black text-rose-500 block mb-1">売り指値</span>
+                        <div id="sellOut" class="text-2xl font-black text-white tracking-tighter">---</div>
+                    </div>
+                </div>
+                <div class="bg-sky-500/5 p-3 rounded-2xl">
+                    <p id="hintText" class="text-[11px] text-sky-300/80 text-center leading-relaxed">
+                        数値を入力すると、スプレッドを考慮した正確な指値を算出します。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- フッター（説明文） -->
+        <div class="px-2 space-y-4">
+            <p class="text-[11px] text-slate-500 text-center leading-relaxed">
+                MT4のチャートは売り価格の表示です。<br>
+                買い注文はスプレッドの分だけ「上」で約定するため、<br>
+                水平線での反発を狙う際はこの計算機の数値を使ってください。
+            </p>
+            
+            <!-- 用語解説 -->
+            <div class="bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl space-y-2">
+                <p class="text-[10px] text-slate-400 leading-relaxed font-bold">
+                    <span class="text-sky-400">※各銘柄グループの解説（XM等のMT4）</span>
+                </p>
+                <ul class="text-[10px] text-slate-400 leading-relaxed list-disc list-inside space-y-1">
+                    <li><span class="text-slate-300">日経・SP500等</span>：国の代表企業の株価指数</li>
+                    <li><span class="text-slate-300">金・銀・原油</span>：コモディティ（商品）</li>
+                    <li><span class="text-slate-300">BTC・ETH</span>：仮想通貨（暗号資産）</li>
+                </ul>
+            </div>
+
+            <div class="flex justify-center pt-2 pb-4">
+                <div class="bg-slate-800/50 px-5 py-2 rounded-full border border-slate-700/50">
+                    <span class="text-[10px] font-bold text-slate-400 tracking-widest">公式 4種の神器ツール</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'jpy';
+
+        function setMode(m) {
+            mode = m;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+            document.getElementById('btn-' + m).classList.add('active-mode');
+            
+            const badge = document.getElementById('modeBadge');
+            const pInput = document.getElementById('priceInput');
+            const sInput = document.getElementById('spreadInput');
+            
+            if(m === 'jpy') { badge.innerText = "ドル円 / クロス円"; pInput.placeholder = "例: 145.500"; sInput.placeholder = "例: 20"; }
+            if(m === 'usd') { badge.innerText = "ドルストレート"; pInput.placeholder = "例: 1.08550"; sInput.placeholder = "例: 15"; }
+            if(m === 'gold') { badge.innerText = "ゴールド (金)"; pInput.placeholder = "例: 2000.50"; sInput.placeholder = "例: 35"; }
+            if(m === 'silver') { badge.innerText = "シルバー (銀)"; pInput.placeholder = "例: 25.500"; sInput.placeholder = "例: 25"; }
+            if(m === 'nikkei') { badge.innerText = "日経平均"; pInput.placeholder = "例: 39500"; sInput.placeholder = "例: 12"; }
+            if(m === 'us_index') { badge.innerText = "米国指数 (SP500等)"; pInput.placeholder = "例: 5100.50"; sInput.placeholder = "例: 50"; }
+            if(m === 'oil') { badge.innerText = "原油 (OIL)"; pInput.placeholder = "例: 75.50"; sInput.placeholder = "例: 30"; }
+            if(m === 'crypto') { badge.innerText = "仮想通貨 (BTC/ETH)"; pInput.placeholder = "例: 65000.00"; sInput.placeholder = "例: 3500"; }
+            
+            runCalc();
+        }
+
+        function runCalc() {
+            const spr = parseFloat(document.getElementById('spreadInput').value);
+            const prc = parseFloat(document.getElementById('priceInput').value);
+            const buyOut = document.getElementById('buyOut');
+            const sellOut = document.getElementById('sellOut');
+            const hint = document.getElementById('hintText');
+
+            if (isNaN(spr) || isNaN(prc)) {
+                buyOut.innerText = "---";
+                sellOut.innerText = "---";
+                hint.innerText = "数値を入力すると、スプレッドを考慮した正確な指値を算出します。";
+                return;
+            }
+
+            let offset = 0;
+            let digits = 3;
+
+            // 100%正確なMT4(XM基準)のポイント計算ロジック
+            switch(mode) {
+                case 'jpy': offset = spr * 0.001; digits = 3; break;
+                case 'usd': offset = spr * 0.00001; digits = 5; break;
+                case 'gold': offset = spr * 0.01; digits = 2; break;
+                case 'silver': offset = spr * 0.001; digits = 3; break;
+                case 'nikkei': offset = spr * 1; digits = 0; break;
+                case 'us_index': offset = spr * 0.01; digits = 2; break;
+                case 'oil': offset = spr * 0.01; digits = 2; break;
+                case 'crypto': offset = spr * 0.01; digits = 2; break;
+            }
+
+            const buyFinal = prc + offset;
+            const sellFinal = prc; // 売りは売り価格(Bid)基準なのでそのまま
+
+            buyOut.innerText = buyFinal.toFixed(digits);
+            sellOut.innerText = sellFinal.toFixed(digits);
+            
+            hint.innerHTML = `【分析結果】<br>スプレッド分（<strong>${offset.toFixed(digits)}</strong>）を計算に含めました。<br>買いの場合は水平線より少し上で待つのが FX SHIELD 流です。`;
+        }
+    </script>
+</body>
+</html>
