@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FX Shield - ロット計算ツール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: radial-gradient(circle at 20% 20%, #4c1d95 0%, #2e1065 30%, #1e1b4b 70%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            width: 200%;
+            height: 200%;
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, transparent 60%);
+            animation: pearlMove 15s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pearlMove {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(10%, 10%); }
+        }
+
+        .logo-text {
+            font-family: 'Outfit', 'M PLUS Rounded 1c', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-card {
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(196, 181, 253, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .input-card:focus-within {
+            border-color: #c084fc;
+            background-color: rgba(46, 16, 101, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .result-gradient {
+            background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+            border: 2px solid #ddd6fe;
+            box-shadow: 0 15px 45px -10px rgba(139, 92, 246, 0.7);
+            position: relative;
+        }
+
+        .result-gradient::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.1) 55%, transparent 70%);
+            pointer-events: none;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ddd6fe'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            background: #f5f3ff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(196, 181, 253, 1);
+            border: 2px solid #8b5cf6;
+        }
+
+        .affiliate-link {
+            transition: all 0.2s ease;
+        }
+        .affiliate-link:hover {
+            background-color: rgba(139, 92, 246, 0.2);
+            border-color: rgba(196, 181, 253, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center relative">
+
+    <div class="w-full max-w-md mx-auto relative z-10">
+        <div class="text-center mb-8">
+            <h1 class="logo-text text-5xl font-black text-white mb-1 drop-shadow-2xl">FX Shield</h1>
+            <p class="text-purple-200 font-bold text-xs tracking-[0.2em] uppercase opacity-90">XM MT4基準の資金管理ツール</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="input-card p-4 rounded-3xl">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">取引銘柄</label>
+                <select id="symbol" onchange="onSymbolChange()" class="w-full bg-transparent text-xl font-bold text-white outline-none cursor-pointer">
+                    <optgroup label="FX - 円絡み" class="bg-[#1e1b4b]">
+                        <option value="USDJPY">ドル円 (USDJPY)</option>
+                        <option value="EURJPY">ユーロ円 (EURJPY)</option>
+                        <option value="GBPJPY">ポンド円 (GBPJPY)</option>
+                        <option value="AUDJPY">オージー円 (AUDJPY)</option>
+                        <option value="CADJPY">カナダ円 (CADJPY)</option>
+                    </optgroup>
+
+                    <optgroup label="FX - ドル・その他" class="bg-[#1e1b4b]">
+                        <option value="EURUSD">ユーロドル (EURUSD)</option>
+                        <option value="GBPUSD">ポンドドル (GBPUSD)</option>
+                        <option value="AUDUSD">オージードル (AUDUSD)</option>
+                        <option value="USDCAD">ドルカナダ (USDCAD)</option>
+                        <option value="USDCHF">ドルスイス (USDCHF)</option>
+                        <option value="EURGBP">ユーロポンド (EURGBP)</option>
+                    </optgroup>
+
+                    <optgroup label="貴金属・エネルギー" class="bg-[#1e1b4b]">
+                        <option value="GOLD">ゴールド (GOLD)</option>
+                        <option value="SILVER">シルバー (SILVER)</option>
+                        <option value="OIL">原油 (OIL)</option>
+                    </optgroup>
+
+                    <optgroup label="株価指数" class="bg-[#1e1b4b]">
+                        <option value="JP225">日経平均 (JP225)</option>
+                        <option value="US100">ナスダック100 (US100)</option>
+                        <option value="US500">S&P500 (US500)</option>
+                        <option value="US30">NYダウ (US30)</option>
+                    </optgroup>
+
+                    <optgroup label="仮想通貨" class="bg-[#1e1b4b]">
+                        <option value="BTCUSD">ビットコイン (BTCUSD)</option>
+                        <option value="ETHUSD">イーサリアム (ETHUSD)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="input-card p-4 rounded-3xl">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">口座残高 (円)</label>
+                <input type="number" id="balance" value="100000" oninput="calculate()"
+                    class="w-full bg-transparent text-2xl font-bold text-white outline-none">
+            </div>
+
+            <div class="input-card p-4 rounded-3xl">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-[11px] font-black text-purple-200 uppercase tracking-widest ml-1 italic">許容リスク (%)</label>
+                    <span id="risk-percent-display" class="text-white font-black bg-purple-700 px-3 py-1 rounded-full text-sm shadow-inner">2.0%</span>
+                </div>
+                <input type="range" id="risk-percent" min="0.1" max="10" step="0.1" value="2.0" oninput="updateRiskDisplay()"
+                    class="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-300 mt-2">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="input-card p-4 rounded-3xl">
+                    <label class="block text-[10px] font-black text-purple-200 mb-1 uppercase tracking-widest italic opacity-80 text-center">エントリー価格</label>
+                    <input type="number" id="entry-price" step="0.0001" placeholder="価格を入力" oninput="calcDistanceFromPrice()"
+                        class="w-full bg-transparent text-lg font-bold text-white outline-none text-center">
+                </div>
+                <div class="input-card p-4 rounded-3xl">
+                    <label class="block text-[10px] font-black text-purple-200 mb-1 uppercase tracking-widest italic opacity-80 text-center">損切り価格</label>
+                    <input type="number" id="stop-price" step="0.0001" placeholder="価格を入力" oninput="calcDistanceFromPrice()"
+                        class="w-full bg-transparent text-lg font-bold text-white outline-none text-center">
+                </div>
+            </div>
+
+            <div class="input-card p-4 rounded-3xl">
+                <label class="block text-[11px] font-black text-purple-200 mb-1 uppercase tracking-widest ml-1 italic">損切り値幅（自動計算）</label>
+                <div class="flex items-center">
+                    <input type="number" id="distance" value="20" oninput="calculate()"
+                        class="w-full bg-transparent text-2xl font-bold text-white outline-none">
+                    <span id="unit-text" class="text-purple-200 font-black ml-2 text-sm italic">PIPS</span>
+                </div>
+            </div>
+
+            <div class="result-gradient p-7 rounded-[2.5rem] shadow-2xl relative overflow-hidden mt-6">
+                <div class="relative z-10 text-center">
+                    <p class="text-[12px] font-black text-purple-100 uppercase tracking-[0.2em] mb-1 opacity-90">推奨エントリーロット</p>
+                    <h2 id="result-lots" class="text-6xl font-black text-white tracking-tighter logo-text py-2">
+                        0.00 <span class="text-2xl font-bold opacity-80">lots</span>
+                    </h2>
+
+                    <div class="grid grid-cols-2 gap-4 border-t border-white/20 mt-6 pt-5">
+                        <div class="text-left">
+                            <p class="text-[10px] font-black text-purple-200/80 uppercase mb-1 italic">許容損失額</p>
+                            <p id="result-money" class="text-xl font-black text-white">¥0</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-purple-200/80 uppercase mb-1 italic">1値幅あたり許容額</p>
+                            <p id="result-unit-risk" class="text-xl font-black text-white">¥0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -right-8 -bottom-8 opacity-[0.2] pointer-events-none text-white">
+                    <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div id="rate-container" class="hidden input-card p-4 rounded-3xl border-purple-400/30 space-y-3">
+                <label class="block text-[11px] font-black text-purple-200 uppercase tracking-widest ml-1 italic">換算レート</label>
+
+                <div id="usd-jpy-wrap" class="hidden">
+                    <label class="block text-[10px] text-purple-200 mb-1 ml-1">USDJPY</label>
+                    <input type="number" id="usd-jpy" value="150.00" step="0.01" oninput="calculate()"
+                        class="w-full bg-transparent text-xl font-bold text-white outline-none">
+                </div>
+
+                <div id="gbp-jpy-wrap" class="hidden">
+                    <label class="block text-[10px] text-purple-200 mb-1 ml-1">GBPJPY</label>
+                    <input type="number" id="gbp-jpy" value="190.00" step="0.01" oninput="calculate()"
+                        class="w-full bg-transparent text-xl font-bold text-white outline-none">
+                </div>
+
+                <div id="cad-jpy-wrap" class="hidden">
+                    <label class="block text-[10px] text-purple-200 mb-1 ml-1">CADJPY</label>
+                    <input type="number" id="cad-jpy" value="110.00" step="0.01" oninput="calculate()"
+                        class="w-full bg-transparent text-xl font-bold text-white outline-none">
+                </div>
+
+                <div id="chf-jpy-wrap" class="hidden">
+                    <label class="block text-[10px] text-purple-200 mb-1 ml-1">CHFJPY</label>
+                    <input type="number" id="chf-jpy" value="170.00" step="0.01" oninput="calculate()"
+                        class="w-full bg-transparent text-xl font-bold text-white outline-none">
+                </div>
+            </div>
+
+            <div class="pt-6 pb-12 space-y-2">
+                <label class="block text-[11px] font-black text-purple-300 mb-2 uppercase tracking-[0.3em] text-center italic">Official Links</label>
+
+                <div class="grid grid-cols-1 gap-2">
+                    <a href="https://clicks.affstrack.com/c?c=1084906&l=en&p=1" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">XM リアル口座</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+
+                    <a href="https://clicks.affstrack.com/c?c=1084906&l=en&p=22" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">XM 追加口座</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+
+                    <a href="https://www.forextester.com/idevaffiliate/idevaffiliate.php?id=17940_20_3_36" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">フォレックステスター オンライン版</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+
+                    <a href="https://www.forextester.com/idevaffiliate/idevaffiliate.php?id=17940_5_3_11" target="_blank" class="affiliate-link block bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between group">
+                        <span class="text-sm font-bold text-white">フォレックステスター 通常版</span>
+                        <svg class="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SYMBOL_SPECS = {
+            USDJPY: { type: 'fx', quote: 'JPY', pipSize: 0.01, contractSize: 100000 },
+            EURJPY: { type: 'fx', quote: 'JPY', pipSize: 0.01, contractSize: 100000 },
+            GBPJPY: { type: 'fx', quote: 'JPY', pipSize: 0.01, contractSize: 100000 },
+            AUDJPY: { type: 'fx', quote: 'JPY', pipSize: 0.01, contractSize: 100000 },
+            CADJPY: { type: 'fx', quote: 'JPY', pipSize: 0.01, contractSize: 100000 },
+
+            EURUSD: { type: 'fx', quote: 'USD', pipSize: 0.0001, contractSize: 100000 },
+            GBPUSD: { type: 'fx', quote: 'USD', pipSize: 0.0001, contractSize: 100000 },
+            AUDUSD: { type: 'fx', quote: 'USD', pipSize: 0.0001, contractSize: 100000 },
+            USDCAD: { type: 'fx', quote: 'CAD', pipSize: 0.0001, contractSize: 100000 },
+            USDCHF: { type: 'fx', quote: 'CHF', pipSize: 0.0001, contractSize: 100000 },
+            EURGBP: { type: 'fx', quote: 'GBP', pipSize: 0.0001, contractSize: 100000 },
+
+            GOLD:   { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 1 },
+            SILVER: { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 50 },
+            OIL:    { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 100 },
+
+            JP225:  { type: 'cfd', quote: 'JPY', pointSize: 1.0, contractSize: 1 },
+            US100:  { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 1 },
+            US500:  { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 1 },
+            US30:   { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 1 },
+
+            BTCUSD: { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 1 },
+            ETHUSD: { type: 'cfd', quote: 'USD', pointSize: 1.0, contractSize: 1 }
+        };
+
+        function getEl(id) {
+            return document.getElementById(id);
+        }
+
+        function formatJPY(value) {
+            return '¥' + Math.floor(value).toLocaleString();
+        }
+
+        function updateRiskDisplay() {
+            const risk = parseFloat(getEl('risk-percent').value || 0);
+            getEl('risk-percent-display').innerText = risk.toFixed(1) + '%';
+            calculate();
+        }
+
+        function getSymbolSpec() {
+            const symbol = getEl('symbol').value;
+            return SYMBOL_SPECS[symbol];
+        }
+
+        function getQuoteToJPYRate(currency) {
+            if (currency === 'JPY') return 1;
+            if (currency === 'USD') return parseFloat(getEl('usd-jpy').value) || 150;
+            if (currency === 'GBP') return parseFloat(getEl('gbp-jpy').value) || 190;
+            if (currency === 'CAD') return parseFloat(getEl('cad-jpy').value) || 110;
+            if (currency === 'CHF') return parseFloat(getEl('chf-jpy').value) || 170;
+            return 0;
+        }
+
+        function updateRateInputs() {
+            const spec = getSymbolSpec();
+            const rateContainer = getEl('rate-container');
+
+            const usdWrap = getEl('usd-jpy-wrap');
+            const gbpWrap = getEl('gbp-jpy-wrap');
+            const cadWrap = getEl('cad-jpy-wrap');
+            const chfWrap = getEl('chf-jpy-wrap');
+
+            usdWrap.classList.add('hidden');
+            gbpWrap.classList.add('hidden');
+            cadWrap.classList.add('hidden');
+            chfWrap.classList.add('hidden');
+            rateContainer.classList.add('hidden');
+
+            const needs = new Set();
+
+            if (spec.quote === 'USD') needs.add('USD');
+            if (spec.quote === 'GBP') needs.add('GBP');
+            if (spec.quote === 'CAD') needs.add('CAD');
+            if (spec.quote === 'CHF') needs.add('CHF');
+
+            if (needs.size > 0) {
+                rateContainer.classList.remove('hidden');
+            }
+
+            if (needs.has('USD')) usdWrap.classList.remove('hidden');
+            if (needs.has('GBP')) gbpWrap.classList.remove('hidden');
+            if (needs.has('CAD')) cadWrap.classList.remove('hidden');
+            if (needs.has('CHF')) chfWrap.classList.remove('hidden');
+        }
+
+        function updateUnitText() {
+            const spec = getSymbolSpec();
+            getEl('unit-text').innerText = spec.type === 'fx' ? 'PIPS' : 'POINTS';
+        }
+
+        function calcDistanceFromPrice() {
+            const entry = parseFloat(getEl('entry-price').value);
+            const stop = parseFloat(getEl('stop-price').value);
+            const spec = getSymbolSpec();
+
+            if (isNaN(entry) || isNaN(stop)) {
+                calculate();
+                return;
+            }
+
+            const diff = Math.abs(entry - stop);
+            let distance = 0;
+
+            if (spec.type === 'fx') {
+                distance = diff / spec.pipSize;
+            } else {
+                distance = diff / spec.pointSize;
+            }
+
+            getEl('distance').value = distance.toFixed(2);
+            calculate();
+        }
+
+        function getValuePerUnitPerLotInJPY(symbol) {
+            const spec = SYMBOL_SPECS[symbol];
+
+            if (spec.type === 'fx') {
+                const pipValueInQuote = spec.contractSize * spec.pipSize;
+                return pipValueInQuote * getQuoteToJPYRate(spec.quote);
+            }
+
+            if (spec.type === 'cfd') {
+                const pointValueInQuote = spec.contractSize * spec.pointSize;
+                return pointValueInQuote * getQuoteToJPYRate(spec.quote);
+            }
+
+            return 0;
+        }
+
+        function calculate() {
+            const symbol = getEl('symbol').value;
+            const balance = parseFloat(getEl('balance').value) || 0;
+            const riskPercent = parseFloat(getEl('risk-percent').value) || 0;
+            const distance = parseFloat(getEl('distance').value) || 0;
+
+            if (balance <= 0 || riskPercent <= 0 || distance <= 0) {
+                getEl('result-lots').innerHTML = '0.00 <span class="text-2xl font-bold opacity-80">lots</span>';
+                getEl('result-money').innerText = '¥0';
+                getEl('result-unit-risk').innerText = '¥0';
+                return;
+            }
+
+            const lossAmount = balance * (riskPercent / 100);
+            const valuePerUnitPerLotInJPY = getValuePerUnitPerLotInJPY(symbol);
+
+            if (valuePerUnitPerLotInJPY <= 0) {
+                getEl('result-lots').innerHTML = '0.00 <span class="text-2xl font-bold opacity-80">lots</span>';
+                getEl('result-money').innerText = formatJPY(lossAmount);
+                getEl('result-unit-risk').innerText = '¥0';
+                return;
+            }
+
+            let lots = lossAmount / (valuePerUnitPerLotInJPY * distance);
+            lots = Math.floor(lots * 100) / 100;
+
+            const allowedPerUnit = lossAmount / distance;
+
+            getEl('result-lots').innerHTML = lots.toFixed(2) + ' <span class="text-2xl font-bold opacity-80">lots</span>';
+            getEl('result-money').innerText = formatJPY(lossAmount);
+            getEl('result-unit-risk').innerText = formatJPY(allowedPerUnit);
+        }
+
+        function onSymbolChange() {
+            updateRateInputs();
+            updateUnitText();
+            calcDistanceFromPrice();
+            calculate();
+        }
+
+        window.onload = () => {
+            updateRiskDisplay();
+            onSymbolChange();
+        };
+    </script>
+</body>
+</html>
