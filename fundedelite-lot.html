@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061526">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FundedElite Lot">
+<title>FundedElite ロット計算機</title>
+
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#06111f;
+  --card:#0c2035;
+  --card2:#102a42;
+  --line:#254964;
+  --text:#f5f9fd;
+  --muted:#9eb4c7;
+  --accent:#28d7c0;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(circle at 95% 0,#16446a,transparent 35%),
+             linear-gradient(#07192c,#040b13);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+}
+.app{
+  width:min(100%,620px);
+  min-height:100vh;
+  margin:auto;
+  padding:calc(20px + env(safe-area-inset-top)) 14px
+          calc(35px + env(safe-area-inset-bottom));
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:0 3px 18px;
+}
+header small{
+  color:var(--accent);
+  font-weight:900;
+  letter-spacing:.15em;
+}
+h1{font-size:23px;margin:4px 0}
+.badge{
+  font-size:11px;
+  font-weight:900;
+  padding:7px 10px;
+  border:1px solid #36617d;
+  border-radius:99px;
+  background:#0e2942;
+}
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line);
+  border-radius:19px;
+  padding:16px;
+  margin-bottom:13px;
+  box-shadow:0 12px 25px #0003;
+}
+.title{
+  font-size:15px;
+  font-weight:900;
+  margin:0 0 13px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.number{
+  display:grid;
+  place-items:center;
+  width:27px;
+  height:27px;
+  border-radius:9px;
+  background:#173c5b;
+  color:var(--accent);
+}
+.big{font-size:31px;font-weight:950}
+.big small{font-size:16px}
+.range{
+  width:100%;
+  accent-color:var(--accent);
+  margin:12px 0 5px;
+}
+.quick{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  margin-top:7px;
+}
+.quick.risk{grid-template-columns:repeat(6,1fr)}
+button{touch-action:manipulation}
+.chip{
+  min-height:40px;
+  border:1px solid #2e536d;
+  border-radius:11px;
+  background:#0a1d30;
+  color:#cfe0ed;
+  font-weight:850;
+  font-size:12px;
+}
+.chip.active{
+  border-color:var(--accent);
+  background:#123f48;
+  color:#fff;
+}
+.sub{
+  font-size:11px;
+  line-height:1.6;
+  color:var(--muted);
+  margin:9px 0 0;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:850;
+  color:#cfdeea;
+  margin-bottom:6px;
+}
+.field{margin-top:13px}
+select,input[type=text]{
+  width:100%;
+  height:52px;
+  border:1px solid #2e526c;
+  border-radius:13px;
+  background:#071827;
+  color:#fff;
+  padding:0 12px;
+  font-size:17px;
+  outline:0;
+}
+select:focus,input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px #28d7c022;
+}
+.two{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.info{
+  margin-top:10px;
+  background:#071a2b;
+  border:1px solid #1f4059;
+  border-radius:12px;
+  padding:10px 11px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+.convert{display:none}
+.result{
+  border-color:#258078;
+  background:radial-gradient(circle at 100% 0,#28d7c02b,transparent 40%),
+             linear-gradient(#103149,#092036);
+}
+.result-label{
+  font-size:12px;
+  font-weight:850;
+  color:#aac1d3;
+}
+.lot{
+  font-size:55px;
+  font-weight:950;
+  line-height:1.05;
+  margin:7px 0;
+}
+.lot small{
+  font-size:17px;
+  color:var(--accent);
+}
+.metrics{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:15px;
+}
+.metric{
+  background:#071827;
+  border:1px solid #1e405a;
+  border-radius:12px;
+  padding:10px;
+}
+.metric span{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  margin-bottom:5px;
+}
+.metric strong{font-size:15px}
+.message{
+  margin-top:11px;
+  border-radius:11px;
+  padding:10px;
+  font-size:11px;
+  line-height:1.55;
+  background:#0a1c2c;
+  color:#bfd0dd;
+}
+.message.warning{
+  background:#3b2c12;
+  color:#ffe2a3;
+  border:1px solid #6c5329;
+}
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.action{
+  height:46px;
+  border:0;
+  border-radius:12px;
+  font-weight:900;
+}
+.copy{
+  background:linear-gradient(135deg,var(--accent),#2cace7);
+  color:#031219;
+}
+.clear{
+  background:#173248;
+  color:#e1ebf3;
+  border:1px solid #31536c;
+}
+.note{
+  text-align:center;
+  color:#718a9e;
+  font-size:10px;
+  line-height:1.65;
+  padding:2px 5px;
+}
+@media(max-width:390px){
+  .quick.risk{grid-template-columns:repeat(3,1fr)}
+  h1{font-size:20px}
+  .lot{font-size:49px}
+  .card{padding:14px}
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+<header>
+  <div>
+    <small>FX SHIELD</small>
+    <h1>FundedElite ロット計算機</h1>
+  </div>
+  <span class="badge">りん専用</span>
+</header>
+
+<section class="card">
+  <h2 class="title"><span class="number">1</span>口座資金</h2>
+
+  <div class="big">
+    <span id="accountText">3,500</span><small> 万円</small>
+  </div>
+
+  <input id="account" class="range" type="range"
+         min="1000" max="5000" step="100" value="3500">
+
+  <div class="quick" id="accountQuick">
+    <button class="chip" data-value="1000">1,000万</button>
+    <button class="chip" data-value="2000">2,000万</button>
+    <button class="chip active" data-value="3500">3,500万</button>
+    <button class="chip" data-value="5000">5,000万</button>
+  </div>
+
+  <p class="sub">100万円単位で1,000万〜5,000万円まで変更できます。</p>
+</section>
+
+<section class="card">
+  <h2 class="title"><span class="number">2</span>リスク</h2>
+
+  <div class="big">
+    <span id="riskText">0.7</span><small>％</small>
+  </div>
+
+  <input id="risk" class="range" type="range"
+         min="0.3" max="2" step="0.1" value="0.7">
+
+  <div class="quick risk" id="riskQuick">
+    <button class="chip" data-value="0.3">0.3%</button>
+    <button class="chip" data-value="0.5">0.5%</button>
+    <button class="chip active" data-value="0.7">0.7%</button>
+    <button class="chip" data-value="1">1.0%</button>
+    <button class="chip" data-value="1.5">1.5%</button>
+    <button class="chip" data-value="2">2.0%</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2 class="title"><span class="number">3</span>銘柄と価格</h2>
+
+  <label for="symbol">銘柄</label>
+
+  <select id="symbol">
+    <optgroup label="FX">
+      <option value="USDJPYc">USDJPY（ドル円）</option>
+      <option value="EURUSDc">EURUSD（ユーロドル）</option>
+      <option value="GBPUSDc">GBPUSD（ポンドドル）</option>
+      <option value="AUDUSDc">AUDUSD（オージードル）</option>
+      <option value="USDCADc">USDCAD（ドルカナダ）</option>
+      <option value="USDCHFc">USDCHF（ドルスイス）</option>
+      <option value="EURJPYc">EURJPY（ユーロ円）</option>
+      <option value="GBPJPYc">GBPJPY（ポンド円）</option>
+      <option value="AUDJPYc">AUDJPY（オージー円）</option>
+      <option value="NZDJPYc">NZDJPY（NZドル円）</option>
+      <option value="CADJPYc">CADJPY（カナダ円）</option>
+      <option value="CHFJPYc">CHFJPY（スイス円）</option>
+      <option value="EURGBPc">EURGBP（ユーロポンド）</option>
+      <option value="GBPAUDc">GBPAUD（ポンドオージー）</option>
+      <option value="EURCADc">EURCAD（ユーロカナダ）</option>
+      <option value="EURAUDc">EURAUD（ユーロオージー）</option>
+    </optgroup>
+
+    <optgroup label="暗号資産">
+      <option value="BTCUSD">BTCUSD（ビットコイン）</option>
+      <option value="ETHUSD">ETHUSD（イーサリアム）</option>
+    </optgroup>
+
+    <optgroup label="貴金属・原油">
+      <option value="XAUUSD">XAUUSD（ゴールド）</option>
+      <option value="XAGUSD">XAGUSD（シルバー）</option>
+      <option value="USOIL.c">USOIL.c（原油）</option>
+    </optgroup>
+
+    <optgroup label="株価指数">
+      <option value="JP225.c">JP225.c（日経225）</option>
+      <option value="DJ30.c">DJ30.c（NYダウ）</option>
+      <option value="US500.c">US500.c（S&amp;P500）</option>
+      <option value="USTEC.c">USTEC.c（NASDAQ）</option>
+    </optgroup>
+  </select>
+
+  <div id="symbolInfo" class="info"></div>
+
+  <div class="two">
+    <div class="field">
+      <label for="entry">エントリー価格</label>
+      <input id="entry" type="text" inputmode="decimal">
+    </div>
+
+    <div class="field">
+      <label for="stop">損切り価格</label>
+      <input id="stop" type="text" inputmode="decimal">
+    </div>
+  </div>
+
+  <div id="conversionWrap" class="field convert">
+    <label id="conversionLabel" for="conversionRate">換算レート</label>
+    <input id="conversionRate" type="text" inputmode="decimal">
+    <p id="conversionHelp" class="sub"></p>
+  </div>
+</section>
+
+<section class="card result" aria-live="polite">
+  <div class="result-label">推奨ロット</div>
+
+  <div class="lot">
+    <span id="lot">—</span> <small>lot</small>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <span>設定リスク額</span>
+      <strong id="targetRisk">245,000円</strong>
+    </div>
+
+    <div class="metric">
+      <span>損失予定額</span>
+      <strong id="actualRisk">—</strong>
+    </div>
+
+    <div class="metric">
+      <span>損切り幅</span>
+      <strong id="distance">—</strong>
+    </div>
+
+    <div class="metric">
+      <span>計算上のロット</span>
+      <strong id="rawLot">—</strong>
+    </div>
+  </div>
+
+  <div id="message" class="message">
+    価格を入力すると計算します。
+  </div>
+
+  <div class="actions">
+    <button id="copy" class="action copy">結果をコピー</button>
+    <button id="clear" class="action clear">価格をクリア</button>
+  </div>
+</section>
+
+<p class="note">
+FundedEliteのMT5仕様をもとに計算しています。手数料がある銘柄は損失予定額へ含めます。スプレッド・スリッページ・スワップは含みません。
+</p>
+
+</main>
+
+<script>
+(function(){
+"use strict";
+
+const instruments = {
+  USDJPYc:["USDJPY",100000,"JPY",0.01,100,0.01,450,3],
+  EURUSDc:["EURUSD",100000,"USD",0.01,100,0.01,450,5],
+  GBPUSDc:["GBPUSD",100000,"USD",0.01,100,0.01,450,5],
+  AUDUSDc:["AUDUSD",100000,"USD",0.01,100,0.01,450,5],
+  USDCADc:["USDCAD",100000,"CAD",0.01,100,0.01,450,5],
+  USDCHFc:["USDCHF",100000,"CHF",0.01,100,0.01,450,5],
+  EURJPYc:["EURJPY",100000,"JPY",0.01,100,0.01,450,3],
+  GBPJPYc:["GBPJPY",100000,"JPY",0.01,100,0.01,450,3],
+  AUDJPYc:["AUDJPY",100000,"JPY",0.01,100,0.01,450,3],
+  NZDJPYc:["NZDJPY",100000,"JPY",0.01,100,0.01,450,3],
+  CADJPYc:["CADJPY",100000,"JPY",0.01,100,0.01,450,3],
+  CHFJPYc:["CHFJPY",100000,"JPY",0.01,100,0.01,450,3],
+  EURGBPc:["EURGBP",100000,"GBP",0.01,100,0.01,450,5],
+  GBPAUDc:["GBPAUD",100000,"AUD",0.01,100,0.01,450,5],
+  EURCADc:["EURCAD",100000,"CAD",0.01,100,0.01,450,5],
+  EURAUDc:["EURAUD",100000,"AUD",0.01,100,0.01,450,5],
+
+  BTCUSD:["BTCUSD",1,"USD",0.01,100,0.01,0,2],
+  ETHUSD:["ETHUSD",1,"USD",0.1,100,0.1,0,2],
+
+  XAUUSD:["XAUUSD",100,"USD",0.01,50,0.01,450,2],
+  XAGUSD:["XAGUSD",5000,"USD",0.01,100,0.01,450,3],
+  "USOIL.c":["USOIL.c",100,"USD",1,10000,1,0,3],
+
+  "JP225.c":["JP225.c",1,"JPY",10,1000,10,0,2],
+  "DJ30.c":["DJ30.c",1,"USD",0.1,100,0.1,0,2],
+  "US500.c":["US500.c",1,"USD",0.1,750,0.1,0,2],
+  "USTEC.c":["USTEC.c",1,"USD",0.1,750,0.1,0,2]
+};
+
+const $ = id => document.getElementById(id);
+
+const account = $("account");
+const risk = $("risk");
+const symbol = $("symbol");
+const entry = $("entry");
+const stop = $("stop");
+const conversionRate = $("conversionRate");
+
+let lastResult = "";
+
+function parseNumber(value){
+  const full = "０１２３４５６７８９．，";
+  const half = "0123456789.,";
+
+  return Number(
+    String(value || "")
+      .replace(/[０-９．，]/g, character => half[full.indexOf(character)])
+      .replace(/,/g,"")
+      .trim()
+  );
+}
+
+function yen(value){
+  return Math.round(value).toLocaleString("ja-JP") + "円";
+}
+
+function decimalPlaces(value){
+  const text = String(value);
+  return text.includes(".") ? text.length - text.indexOf(".") - 1 : 0;
+}
+
+function setActive(containerId,value){
+  $(containerId).querySelectorAll(".chip").forEach(button => {
+    button.classList.toggle(
+      "active",
+      Math.abs(Number(button.dataset.value) - Number(value)) < 0.000001
+    );
+  });
+}
+
+function updateTop(){
+  $("accountText").textContent =
+    Number(account.value).toLocaleString("ja-JP");
+
+  $("riskText").textContent =
+    Number(risk.value).toFixed(1);
+
+  $("targetRisk").textContent =
+    yen(Number(account.value) * 10000 * Number(risk.value) / 100);
+
+  setActive("accountQuick",account.value);
+  setActive("riskQuick",risk.value);
+}
+
+function getStoredRates(){
+  try{
+    return JSON.parse(localStorage.getItem("fundedelite-rates") || "{}");
+  }catch{
+    return {};
+  }
+}
+
+function saveConversionRate(instrument){
+  if(instrument[2] === "JPY") return;
+
+  const rates = getStoredRates();
+  rates[instrument[2] + "JPY"] = conversionRate.value;
+
+  localStorage.setItem(
+    "fundedelite-rates",
+    JSON.stringify(rates)
+  );
+}
+
+function saveSettings(){
+  localStorage.setItem(
+    "fundedelite-settings",
+    JSON.stringify({
+      account:account.value,
+      risk:risk.value,
+      symbol:symbol.value
+    })
+  );
+}
+
+function updateSymbol(){
+  const instrument = instruments[symbol.value];
+
+  const commissionText = instrument[6]
+    ? "・手数料 " + instrument[6] + "円/lot"
+    : "・手数料なし";
+
+  $("symbolInfo").textContent =
+    "契約サイズ " + instrument[1].toLocaleString("ja-JP") +
+    "・最小 " + instrument[3] + " lot" +
+    "・刻み " + instrument[5] + " lot" +
+    commissionText;
+
+  if(instrument[2] === "JPY"){
+    $("conversionWrap").style.display = "none";
+    conversionRate.value = "1";
+  }else{
+    const rateName = instrument[2] + "JPY";
+
+    $("conversionWrap").style.display = "block";
+    $("conversionLabel").textContent = rateName + "の現在価格";
+    $("conversionHelp").textContent =
+      instrument[2] + "で出る損益を円換算するために必要です。";
+
+    conversionRate.value =
+      getStoredRates()[rateName] || "";
+  }
+
+  calculate();
+}
+
+function clearResult(message){
+  $("lot").textContent = "—";
+  $("actualRisk").textContent = "—";
+  $("distance").textContent = "—";
+  $("rawLot").textContent = "—";
+  $("message").className = "message";
+  $("message").textContent = message;
+  lastResult = "";
+}
+
+function calculate(){
+  updateTop();
+
+  const instrument = instruments[symbol.value];
+  const entryPrice = parseNumber(entry.value);
+  const stopPrice = parseNumber(stop.value);
+
+  const targetRisk =
+    Number(account.value) *
+    10000 *
+    Number(risk.value) /
+    100;
+
+  $("targetRisk").textContent = yen(targetRisk);
+
+  if(!(entryPrice > 0) || !(stopPrice > 0)){
+    clearResult("エントリー価格と損切り価格を入力してください。");
+    saveSettings();
+    return;
+  }
+
+  const stopDistance = Math.abs(entryPrice - stopPrice);
+
+  if(!stopDistance){
+    clearResult("エントリー価格と損切り価格が同じです。");
+    return;
+  }
+
+  const rate = instrument[2] === "JPY"
+    ? 1
+    : parseNumber(conversionRate.value);
+
+  if(!(rate > 0)){
+    clearResult(
+      instrument[2] + "JPYの現在価格を入力してください。"
+    );
+
+    $("message").className = "message warning";
+    return;
+  }
+
+  saveConversionRate(instrument);
+
+  const lossPerLot =
+    stopDistance *
+    instrument[1] *
+    rate +
+    instrument[6];
+
+  const calculatedLot =
+    targetRisk / lossPerLot;
+
+  let recommendedLot =
+    Math.floor(
+      (calculatedLot + 0.0000000001) /
+      instrument[5]
+    ) *
+    instrument[5];
+
+  let resultMessage =
+    "設定リスクを超えないよう、" +
+    instrument[5] +
+    " lot単位で切り下げています。";
+
+  if(recommendedLot < instrument[3]){
+    recommendedLot = 0;
+
+    resultMessage =
+      "最小の" +
+      instrument[3] +
+      " lotでも設定リスクを超えるため、0 lotです。";
+  }
+
+  if(recommendedLot > instrument[4]){
+    recommendedLot = instrument[4];
+
+    resultMessage =
+      "最大ロットの" +
+      instrument[4] +
+      " lotで表示しています。";
+  }
+
+  const lotDecimals =
+    decimalPlaces(instrument[5]);
+
+  const actualRisk =
+    recommendedLot * lossPerLot;
+
+  $("lot").textContent =
+    recommendedLot.toFixed(lotDecimals);
+
+  $("actualRisk").textContent =
+    yen(actualRisk);
+
+  $("distance").textContent =
+    stopDistance.toFixed(instrument[7]);
+
+  $("rawLot").textContent =
+    calculatedLot.toFixed(
+      Math.max(2,lotDecimals + 2)
+    );
+
+  $("message").className =
+    "message" + (recommendedLot ? "" : " warning");
+
+  $("message").textContent =
+    resultMessage;
+
+  lastResult = [
+    "【FundedElite ロット計算】",
+    "口座：" +
+      Number(account.value).toLocaleString("ja-JP") +
+      "万円",
+    "リスク：" +
+      Number(risk.value).toFixed(1) +
+      "％",
+    "銘柄：" +
+      instrument[0],
+    "エントリー：" +
+      entryPrice,
+    "損切り：" +
+      stopPrice,
+    "推奨ロット：" +
+      recommendedLot.toFixed(lotDecimals) +
+      " lot",
+    "設定リスク額：" +
+      yen(targetRisk),
+    "損失予定額：" +
+      yen(actualRisk)
+  ].join("\n");
+
+  saveSettings();
+}
+
+function setQuickButtons(containerId,input){
+  $(containerId).addEventListener("click",event => {
+    const button = event.target.closest(".chip");
+
+    if(!button) return;
+
+    input.value = button.dataset.value;
+    calculate();
+  });
+}
+
+[account,risk,entry,stop,conversionRate].forEach(element => {
+  element.addEventListener("input",calculate);
+});
+
+symbol.addEventListener("change",updateSymbol);
+
+setQuickButtons("accountQuick",account);
+setQuickButtons("riskQuick",risk);
+
+$("clear").addEventListener("click",() => {
+  entry.value = "";
+  stop.value = "";
+  calculate();
+  entry.focus();
+});
+
+$("copy").addEventListener("click",async () => {
+  if(!lastResult){
+    $("message").textContent =
+      "先に価格を入力してください。";
+    return;
+  }
+
+  await navigator.clipboard.writeText(lastResult);
+
+  $("message").textContent =
+    "結果をコピーしました。";
+});
+
+try{
+  const saved =
+    JSON.parse(
+      localStorage.getItem("fundedelite-settings") || "{}"
+    );
+
+  if(saved.account) account.value = saved.account;
+  if(saved.risk) risk.value = saved.risk;
+
+  if(saved.symbol && instruments[saved.symbol]){
+    symbol.value = saved.symbol;
+  }
+}catch{}
+
+updateTop();
+updateSymbol();
+
+})();
+</script>
+</body>
+</html>
