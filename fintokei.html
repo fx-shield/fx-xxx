@@ -93,7 +93,15 @@ select:focus,input:focus{border-color:#bd6cff;box-shadow:0 0 0 3px #b965ff22}
 <div class="field"><label for="entry">エントリー価格</label><input id="entry" type="text" inputmode="decimal"></div>
 <div class="field"><label for="stop">損切り価格</label><input id="stop" type="text" inputmode="decimal"></div>
 </div>
-<div id="conversionWrap" class="field convert"><label id="conversionLabel" for="conversionRate">円換算レート</label><input id="conversionRate" type="text" inputmode="decimal"><p id="conversionHelp" class="sub"></p></div>
+<div id="conversionWrap" class="field convert">
+<label>円換算レート</label>
+<div id="rateStatus" class="info">自動取得中...</div>
+<div id="manualRateWrap" style="display:none;margin-top:8px">
+<label id="conversionLabel" for="conversionRate">手動レート</label>
+<input id="conversionRate" type="text" inputmode="decimal">
+<p id="conversionHelp" class="sub">自動取得できない時だけ入力してください。</p>
+</div>
+</div>
 </section>
 
 <section class="card result" aria-live="polite">
@@ -103,8 +111,9 @@ select:focus,input:focus{border-color:#bd6cff;box-shadow:0 0 0 3px #b965ff22}
 <div class="actions"><button id="copy" class="action copy">結果をコピー</button><button id="clear" class="action clear">価格をクリア</button></div>
 </section>
 
-<p class="note">Fintokei MT5で確認した銘柄仕様を使用。ロットは0.01刻みで切り捨て。スプレッド・スリッページ・スワップ・手数料は含みません。</p>
+<p class="note">Fintokei MT5で確認した銘柄仕様を使用。円換算レートは自動取得し、取得できない場合のみ手入力。ロットは0.01刻みで切り捨て。スプレッド・スリッページ・スワップ・手数料は含みません。</p>
 </main>
+
 
 <script>
 (()=>{"use strict";
@@ -122,36 +131,154 @@ US500p:{name:"S&P500",contract:1,quote:"USD",min:.01,max:1500,step:.01,digits:2,
 BTCUSDp:{name:"Bitcoin",contract:1,quote:"USD",min:.01,max:15,step:.01,digits:2,tick:"0.01 / 0.01 USD"},
 ETHUSDp:{name:"Ethereum",contract:1,quote:"USD",min:.01,max:15,step:.01,digits:3,tick:"0.001 / 0.001 USD"}
 });
-const ratePairs={USD:"USDJPY",CAD:"CADJPY",CHF:"CHFJPY",GBP:"GBPJPY",AUD:"AUDJPY"};
+
 const $=id=>document.getElementById(id);
-const el={accountRange:$("accountRange"),accountNumber:$("accountNumber"),accountText:$("accountText"),accountMinus:$("accountMinus"),accountPlus:$("accountPlus"),risk:$("risk"),riskText:$("riskText"),symbol:$("symbol"),entry:$("entry"),stop:$("stop"),conversionWrap:$("conversionWrap"),conversionLabel:$("conversionLabel"),conversionRate:$("conversionRate"),conversionHelp:$("conversionHelp"),symbolInfo:$("symbolInfo"),lot:$("lot"),targetRisk:$("targetRisk"),actualRisk:$("actualRisk"),distance:$("distance"),actualRiskPct:$("actualRiskPct"),message:$("message")};
+const el={
+ accountRange:$("accountRange"),accountNumber:$("accountNumber"),accountText:$("accountText"),
+ accountMinus:$("accountMinus"),accountPlus:$("accountPlus"),risk:$("risk"),riskText:$("riskText"),
+ symbol:$("symbol"),entry:$("entry"),stop:$("stop"),conversionWrap:$("conversionWrap"),
+ conversionLabel:$("conversionLabel"),conversionRate:$("conversionRate"),conversionHelp:$("conversionHelp"),
+ manualRateWrap:$("manualRateWrap"),rateStatus:$("rateStatus"),symbolInfo:$("symbolInfo"),lot:$("lot"),
+ targetRisk:$("targetRisk"),actualRisk:$("actualRisk"),distance:$("distance"),actualRiskPct:$("actualRiskPct"),
+ message:$("message")
+};
+
 const num=v=>{const n=parseFloat(String(v).replace(/,/g,""));return Number.isFinite(n)?n:NaN};
 const yen=n=>Number.isFinite(n)?Math.round(n).toLocaleString("ja-JP")+"円":"—";
 const floorStep=(n,s)=>Math.floor((n+1e-12)/s)*s;
 const fmtLot=n=>Number.isFinite(n)?n.toFixed(2):"—";
+const needed=["USD","CAD","CHF","GBP","AUD"];
+let autoRates={JPY:1};
+let rateMeta={source:"",time:0};
+
 function clampAccount(v){v=Math.round(v/100)*100;return Math.min(5000,Math.max(500,v))}
 function setAccount(v){v=clampAccount(v);el.accountRange.value=v;el.accountNumber.value=v;el.accountText.textContent=v.toLocaleString("ja-JP");calculate()}
 function accountYen(){return Number(el.accountRange.value)*10000}
 function target(){return accountYen()*num(el.risk.value)/100}
 function setActive(container,value){document.querySelectorAll(`#${container} .chip`).forEach(b=>b.classList.toggle("active",Number(b.dataset.value)===Number(value)))}
 function updateHeader(){const a=Number(el.accountRange.value);el.accountText.textContent=a.toLocaleString("ja-JP");el.accountNumber.value=a;el.riskText.textContent=Number(el.risk.value).toFixed(1).replace(/\.0$/,"");el.targetRisk.textContent=yen(target());setActive("accountQuick",a);setActive("riskQuick",el.risk.value)}
-function updateSymbol(){const s=instruments[el.symbol.value],pair=ratePairs[s.quote];el.symbolInfo.innerHTML=`<span class="spec"><b>${el.symbol.value}</b>｜契約サイズ ${s.contract.toLocaleString()}｜最小 ${s.min}｜最大 ${s.max} lot｜刻み ${s.step}${s.tick?`<br>ティック ${s.tick}`:""}</span>`;if(s.quote==="JPY"){el.conversionWrap.style.display="none";el.conversionRate.value="1"}else{el.conversionWrap.style.display="block";el.conversionLabel.textContent=`${s.quote}→円 換算レート`;el.conversionHelp.textContent=`現在の ${pair||s.quote+"JPY"} を入力してください。`;el.conversionRate.value=localStorage.getItem("fk-rate-"+s.quote)||""}calculate()}
-function calculate(){updateHeader();const s=instruments[el.symbol.value],e=num(el.entry.value),st=num(el.stop.value);if(!Number.isFinite(e)||!Number.isFinite(st)||e===st){el.lot.textContent="—";el.actualRisk.textContent="—";el.distance.textContent="—";el.actualRiskPct.textContent="—";el.message.className="message";el.message.textContent="エントリー価格と損切り価格を入力してください。";return}const d=Math.abs(e-st);let conv=s.quote==="JPY"?1:num(el.conversionRate.value);if(!Number.isFinite(conv)||conv<=0){el.lot.textContent="—";el.actualRisk.textContent="—";el.distance.textContent=d.toFixed(s.digits);el.actualRiskPct.textContent="—";el.message.className="message warning";el.message.textContent=`${s.quote}→円の換算レートを入力してください。`;return}if(s.quote!=="JPY")localStorage.setItem("fk-rate-"+s.quote,String(conv));const perLotJPY=d*s.contract*conv;const raw=target()/perLotJPY;let rec=floorStep(raw,s.step),warn="";if(rec>s.max){rec=s.max;warn=`最大取引数量 ${s.max} lot に制限しています。`}if(rec<s.min){rec=0;warn=`計算上 ${s.min} lot 未満です。`}const actual=perLotJPY*rec;el.lot.textContent=fmtLot(rec);el.actualRisk.textContent=yen(actual);el.distance.textContent=d.toFixed(s.digits);el.actualRiskPct.textContent=rec>0?(actual/accountYen()*100).toFixed(3)+"%":"—";el.message.className=warn?"message warning":"message";el.message.textContent=warn||`計算上 ${raw.toFixed(3)} lot → 0.01刻みで切り捨て。`}
+
+function saveRates(){
+ try{localStorage.setItem("fk-auto-rates",JSON.stringify({rates:autoRates,meta:rateMeta}))}catch{}
+}
+function loadCachedRates(){
+ try{
+  const x=JSON.parse(localStorage.getItem("fk-auto-rates")||"null");
+  if(x&&x.rates){autoRates={...autoRates,...x.rates};rateMeta=x.meta||{};return true}
+ }catch{}
+ return false;
+}
+
+async function fetchPrimaryRates(){
+ const r=await fetch("https://ratata.money/api/v1/rates/latest?base=USD&symbols=JPY,CAD,CHF,GBP,AUD",{cache:"no-store"});
+ if(!r.ok) throw new Error("primary");
+ const d=await r.json();
+ if(!d.rates||!d.rates.JPY) throw new Error("primary-data");
+ const usdJpy=Number(d.rates.JPY);
+ const out={JPY:1,USD:usdJpy};
+ for(const c of ["CAD","CHF","GBP","AUD"]){
+   const perUsd=Number(d.rates[c]);
+   if(!perUsd) throw new Error("primary-pair");
+   out[c]=usdJpy/perUsd;
+ }
+ return {rates:out,source:"自動",time:(Number(d.timestamp)||Math.floor(Date.now()/1000))*1000};
+}
+
+async function fetchFallbackRates(){
+ const pairs=await Promise.all(needed.map(async c=>{
+   const r=await fetch(`https://api.frankfurter.dev/v1/latest?base=${c}&symbols=JPY`,{cache:"no-store"});
+   if(!r.ok) throw new Error("fallback");
+   const d=await r.json();
+   return [c,Number(d.rates&&d.rates.JPY),d.date];
+ }));
+ const out={JPY:1}; let date="";
+ for(const [c,v,d] of pairs){if(!v)throw new Error("fallback-data");out[c]=v;date=d||date}
+ return {rates:out,source:"自動（参考レート）",time:Date.now(),date};
+}
+
+async function refreshRates(){
+ const hadCache=loadCachedRates();
+ if(hadCache) updateRateUI();
+ try{
+   let got;
+   try{got=await fetchPrimaryRates()}catch{got=await fetchFallbackRates()}
+   autoRates={...autoRates,...got.rates};rateMeta=got;saveRates();updateRateUI();calculate();
+ }catch{
+   if(!hadCache){updateRateUI(true)}
+ }
+}
+
+function currentRate(quote){
+ if(quote==="JPY") return 1;
+ const a=Number(autoRates[quote]);
+ if(Number.isFinite(a)&&a>0) return a;
+ const manual=num(el.conversionRate.value);
+ return Number.isFinite(manual)&&manual>0?manual:NaN;
+}
+
+function updateRateUI(forceManual=false){
+ const s=instruments[el.symbol.value];
+ if(s.quote==="JPY"){el.conversionWrap.style.display="none";return}
+ el.conversionWrap.style.display="block";
+ const r=Number(autoRates[s.quote]);
+ if(!forceManual&&Number.isFinite(r)&&r>0){
+   const age=rateMeta.time?new Date(rateMeta.time).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+   el.rateStatus.textContent=`自動取得：1 ${s.quote} = ${r.toFixed(3)}円${age?`（${age}）`:""}`;
+   el.manualRateWrap.style.display="none";
+ }else{
+   el.rateStatus.textContent="自動取得できませんでした。下の手動レートを使ってください。";
+   el.manualRateWrap.style.display="block";
+   el.conversionLabel.textContent=`${s.quote}→円 手動レート`;
+ }
+}
+
+function updateSymbol(){
+ const s=instruments[el.symbol.value];
+ el.symbolInfo.innerHTML=`<span class="spec"><b>${el.symbol.value}</b>｜契約サイズ ${s.contract.toLocaleString()}｜最小 ${s.min}｜最大 ${s.max} lot｜刻み ${s.step}${s.tick?`<br>ティック ${s.tick}`:""}</span>`;
+ updateRateUI();
+ calculate();
+}
+
+function calculate(){
+ updateHeader();
+ const s=instruments[el.symbol.value],e=num(el.entry.value),st=num(el.stop.value);
+ if(!Number.isFinite(e)||!Number.isFinite(st)||e===st){
+  el.lot.textContent="—";el.actualRisk.textContent="—";el.distance.textContent="—";el.actualRiskPct.textContent="—";
+  el.message.className="message";el.message.textContent="エントリー価格と損切り価格を入力してください。";return
+ }
+ const d=Math.abs(e-st),conv=currentRate(s.quote);
+ if(!Number.isFinite(conv)||conv<=0){
+  el.lot.textContent="—";el.actualRisk.textContent="—";el.distance.textContent=d.toFixed(s.digits);el.actualRiskPct.textContent="—";
+  el.message.className="message warning";el.message.textContent="円換算レートを取得中です。取得できない場合は手動レートを入力してください。";return
+ }
+ const perLotJPY=d*s.contract*conv,raw=target()/perLotJPY;
+ let rec=floorStep(raw,s.step),warn="";
+ if(rec>s.max){rec=s.max;warn=`最大取引数量 ${s.max} lot に制限しています。`}
+ if(rec<s.min){rec=0;warn=`計算上 ${s.min} lot 未満です。`}
+ const actual=perLotJPY*rec;
+ el.lot.textContent=fmtLot(rec);el.actualRisk.textContent=yen(actual);el.distance.textContent=d.toFixed(s.digits);
+ el.actualRiskPct.textContent=rec>0?(actual/accountYen()*100).toFixed(3)+"%":"—";
+ el.message.className=warn?"message warning":"message";
+ el.message.textContent=warn||`計算上 ${raw.toFixed(3)} lot → 0.01刻みで切り捨て。`;
+}
+
 el.accountRange.addEventListener("input",()=>setAccount(Number(el.accountRange.value)));
 el.accountRange.addEventListener("change",()=>setAccount(Number(el.accountRange.value)));
 el.accountNumber.addEventListener("change",()=>setAccount(Number(el.accountNumber.value)));
 el.accountNumber.addEventListener("blur",()=>setAccount(Number(el.accountNumber.value)));
 el.accountMinus.addEventListener("click",()=>setAccount(Number(el.accountRange.value)-100));
 el.accountPlus.addEventListener("click",()=>setAccount(Number(el.accountRange.value)+100));
-el.risk.addEventListener("input",calculate);
-el.risk.addEventListener("change",calculate);
+el.risk.addEventListener("input",calculate);el.risk.addEventListener("change",calculate);
 el.symbol.addEventListener("change",updateSymbol);
 [el.entry,el.stop,el.conversionRate].forEach(x=>x.addEventListener("input",calculate));
 document.querySelectorAll("#accountQuick .chip").forEach(b=>b.addEventListener("click",()=>setAccount(Number(b.dataset.value))));
 document.querySelectorAll("#riskQuick .chip").forEach(b=>b.addEventListener("click",()=>{el.risk.value=b.dataset.value;calculate()}));
 $("clear").addEventListener("click",()=>{el.entry.value="";el.stop.value="";calculate()});
-$("copy").addEventListener("click",async()=>{const s=instruments[el.symbol.value];const t=`Fintokei｜${s.name}\n口座 ${el.accountText.textContent}万円｜リスク ${el.riskText.textContent}%\n推奨 ${el.lot.textContent} lot\n損失予定 ${el.actualRisk.textContent}`;try{await navigator.clipboard.writeText(t);el.message.textContent="結果をコピーしました。"}catch{el.message.textContent="コピーできませんでした。"}});
-updateSymbol();setAccount(2000);
+$("copy").addEventListener("click",async()=>{const s=instruments[el.symbol.value];const t=`Fintokei｜${s.name}
+口座 ${el.accountText.textContent}万円｜リスク ${el.riskText.textContent}%
+推奨 ${el.lot.textContent} lot
+損失予定 ${el.actualRisk.textContent}`;try{await navigator.clipboard.writeText(t);el.message.textContent="結果をコピーしました。"}catch{el.message.textContent="コピーできませんでした。"}});
+updateSymbol();setAccount(2000);refreshRates();
 })();
 </script>
 </body>
