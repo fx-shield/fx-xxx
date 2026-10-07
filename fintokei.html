@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5b00b8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fintokei Lot">
+<title>Fintokei ロット計算機</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--card:#211032;--card2:#2b1343;--line:#5d2d82;--text:#fff;--muted:#cbb8da;--accent:#b965ff}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 100% 0,#6f21c955,transparent 32%),linear-gradient(180deg,#1b082d,#0d0416);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+.app{width:min(100%,620px);min-height:100vh;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 14px calc(34px + env(safe-area-inset-bottom))}
+header{margin:0 3px 16px}header small{color:#d7a5ff;font-weight:900;letter-spacing:.14em}h1{font-size:23px;margin:4px 0}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:19px;padding:16px;margin-bottom:13px;box-shadow:0 14px 28px #0004}
+.title{font-size:15px;font-weight:900;margin:0 0 13px;display:flex;align-items:center;gap:8px}.number{display:grid;place-items:center;width:27px;height:27px;border-radius:9px;background:#451d68;color:#e0b7ff}
+.big{font-size:31px;font-weight:950}.big small{font-size:16px}
+.range{width:100%;accent-color:var(--accent);margin:12px 0 8px}
+.account-editor{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:10px}
+.account-editor input{height:48px}
+.unit{font-size:13px;color:#e7d9ef;padding-bottom:14px}
+.step-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.step-btn{height:44px;border:1px solid #6a4687;border-radius:12px;background:#1a0a28;color:#fff;font-weight:900;font-size:13px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}.quick.risk{grid-template-columns:repeat(6,1fr)}
+.chip{min-height:40px;border:1px solid #634180;border-radius:11px;background:#1a0a28;color:#ddcdeb;font-weight:850;font-size:12px}.chip.active{border-color:#c77bff;background:#4b1b70;color:#fff}
+.sub{font-size:11px;line-height:1.6;color:var(--muted);margin:9px 0 0}
+label{display:block;font-size:13px;font-weight:850;color:#eadcf4;margin-bottom:6px}.field{margin-top:13px}
+select,input[type=text],input[type=number]{width:100%;height:52px;border:1px solid #6a4687;border-radius:13px;background:#160823;color:#fff;padding:0 12px;font-size:17px;outline:0}
+select:focus,input:focus{border-color:#bd6cff;box-shadow:0 0 0 3px #b965ff22}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.info{margin-top:10px;background:#180924;border:1px solid #55316f;border-radius:12px;padding:10px 11px;color:var(--muted);font-size:11px;line-height:1.65}.convert{display:none}
+.result{border-color:#8247ae;background:radial-gradient(circle at 100% 0,#b965ff33,transparent 42%),linear-gradient(#371552,#1d0d30)}
+.result-label{font-size:12px;font-weight:850;color:#d9c4e7}.lot{font-size:56px;font-weight:950;line-height:1.05;margin:7px 0}.lot small{font-size:17px;color:#dba8ff}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}.metric{background:#180923;border:1px solid #573271;border-radius:12px;padding:10px}.metric span{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}.metric strong{font-size:15px}
+.message{margin-top:11px;border-radius:11px;padding:10px;font-size:11px;line-height:1.55;background:#1a0b27;color:#dbcbe7}.message.warning{background:#422516;color:#ffd9a1;border:1px solid #7b4c27}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.action{height:46px;border:0;border-radius:12px;font-weight:900}.copy{background:linear-gradient(135deg,#c66eff,#7525df);color:white}.clear{background:#33164a;color:#efe4f6;border:1px solid #694189}
+.note{text-align:center;color:#9b80ad;font-size:10px;line-height:1.65;padding:2px 5px}.count{font-size:10px;color:#bda4ce;margin-top:6px}.spec{color:#efe1f7}.spec b{color:#fff}
+@media(max-width:390px){.quick.risk{grid-template-columns:repeat(3,1fr)}h1{font-size:20px}.lot{font-size:49px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><small>FX SHIELD</small><h1>Fintokei ロット計算機</h1></header>
+
+<section class="card">
+<h2 class="title"><span class="number">1</span>口座資金</h2>
+<div class="big"><span id="accountText">2,000</span><small> 万円</small></div>
+<input id="accountRange" class="range" type="range" min="500" max="5000" step="100" value="2000">
+<div class="account-editor">
+  <div>
+    <label for="accountNumber">口座資金（万円）</label>
+    <input id="accountNumber" type="number" min="500" max="5000" step="100" value="2000" inputmode="numeric">
+  </div>
+  <div class="unit">100万円単位</div>
+</div>
+<div class="step-row">
+<button id="accountMinus" class="step-btn">−100万円</button>
+<button id="accountPlus" class="step-btn">＋100万円</button>
+</div>
+<div class="quick" id="accountQuick">
+<button class="chip" data-value="1000">1,000万</button>
+<button class="chip active" data-value="2000">2,000万</button>
+<button class="chip" data-value="3500">3,500万</button>
+<button class="chip" data-value="5000">5,000万</button>
+</div>
+<p class="sub">横棒・数字入力・±100万円ボタン、どれでも変更できます。</p>
+</section>
+
+<section class="card">
+<h2 class="title"><span class="number">2</span>リスク</h2>
+<div class="big"><span id="riskText">0.7</span><small>％</small></div>
+<input id="risk" class="range" type="range" min="0.1" max="2" step="0.1" value="0.7">
+<div class="quick risk" id="riskQuick">
+<button class="chip" data-value="0.3">0.3%</button><button class="chip" data-value="0.5">0.5%</button><button class="chip active" data-value="0.7">0.7%</button><button class="chip" data-value="1">1.0%</button><button class="chip" data-value="1.5">1.5%</button><button class="chip" data-value="2">2.0%</button>
+</div>
+</section>
+
+<section class="card">
+<h2 class="title"><span class="number">3</span>銘柄と価格</h2>
+<label for="symbol">銘柄</label>
+<select id="symbol">
+<optgroup label="FX 16通貨">
+<option value="USDJPYp">USDJPY（ドル円）</option><option value="EURUSDp">EURUSD（ユーロドル）</option><option value="GBPUSDp">GBPUSD（ポンドドル）</option><option value="AUDUSDp">AUDUSD（オージードル）</option><option value="USDCADp">USDCAD（ドルカナダ）</option><option value="USDCHFp">USDCHF（ドルスイス）</option><option value="EURJPYp">EURJPY（ユーロ円）</option><option value="GBPJPYp">GBPJPY（ポンド円）</option><option value="AUDJPYp">AUDJPY（オージー円）</option><option value="NZDJPYp">NZDJPY（NZドル円）</option><option value="CADJPYp">CADJPY（カナダ円）</option><option value="CHFJPYp">CHFJPY（スイス円）</option><option value="EURGBPp">EURGBP（ユーロポンド）</option><option value="GBPAUDp">GBPAUD（ポンドオージー）</option><option value="EURCADp">EURCAD（ユーロカナダ）</option><option value="EURAUDp">EURAUD（ユーロオージー）</option>
+</optgroup>
+<optgroup label="貴金属・原油"><option value="XAUUSDp">GOLD｜XAUUSDp</option><option value="XAGUSDp">SILVER｜XAGUSDp</option><option value="USOILp">OIL｜USOILp</option></optgroup>
+<optgroup label="株価指数"><option value="US100p">NASDAQ｜US100p</option><option value="US30p">DOW｜US30p</option><option value="JP225p">日経225｜JP225p</option><option value="US500p">S&amp;P500｜US500p</option></optgroup>
+<optgroup label="暗号資産"><option value="BTCUSDp">Bitcoin｜BTCUSDp</option><option value="ETHUSDp">Ethereum｜ETHUSDp</option></optgroup>
+</select>
+<div class="count">全25銘柄</div><div id="symbolInfo" class="info"></div>
+<div class="two">
+<div class="field"><label for="entry">エントリー価格</label><input id="entry" type="text" inputmode="decimal"></div>
+<div class="field"><label for="stop">損切り価格</label><input id="stop" type="text" inputmode="decimal"></div>
+</div>
+<div id="conversionWrap" class="field convert"><label id="conversionLabel" for="conversionRate">円換算レート</label><input id="conversionRate" type="text" inputmode="decimal"><p id="conversionHelp" class="sub"></p></div>
+</section>
+
+<section class="card result" aria-live="polite">
+<div class="result-label">推奨ロット</div><div class="lot"><span id="lot">—</span> <small>lot</small></div>
+<div class="metrics"><div class="metric"><span>設定リスク額</span><strong id="targetRisk">140,000円</strong></div><div class="metric"><span>損失予定額</span><strong id="actualRisk">—</strong></div><div class="metric"><span>損切り幅</span><strong id="distance">—</strong></div><div class="metric"><span>実際のリスク率</span><strong id="actualRiskPct">—</strong></div></div>
+<div id="message" class="message">価格を入力すると計算します。</div>
+<div class="actions"><button id="copy" class="action copy">結果をコピー</button><button id="clear" class="action clear">価格をクリア</button></div>
+</section>
+
+<p class="note">Fintokei MT5で確認した銘柄仕様を使用。ロットは0.01刻みで切り捨て。スプレッド・スリッページ・スワップ・手数料は含みません。</p>
+</main>
+
+<script>
+(()=>{"use strict";
+const FX={USDJPYp:["USDJPY","JPY"],EURUSDp:["EURUSD","USD"],GBPUSDp:["GBPUSD","USD"],AUDUSDp:["AUDUSD","USD"],USDCADp:["USDCAD","CAD"],USDCHFp:["USDCHF","CHF"],EURJPYp:["EURJPY","JPY"],GBPJPYp:["GBPJPY","JPY"],AUDJPYp:["AUDJPY","JPY"],NZDJPYp:["NZDJPY","JPY"],CADJPYp:["CADJPY","JPY"],CHFJPYp:["CHFJPY","JPY"],EURGBPp:["EURGBP","GBP"],GBPAUDp:["GBPAUD","AUD"],EURCADp:["EURCAD","CAD"],EURAUDp:["EURAUD","AUD"]};
+const instruments={};
+Object.entries(FX).forEach(([k,v])=>instruments[k]={name:v[0],contract:100000,quote:v[1],min:.01,max:100,step:.01,digits:v[1]==="JPY"?3:5});
+Object.assign(instruments,{
+XAUUSDp:{name:"GOLD",contract:100,quote:"USD",min:.01,max:100,step:.01,digits:2,tick:"0.01 / 1 USD"},
+XAGUSDp:{name:"SILVER",contract:5000,quote:"USD",min:.01,max:100,step:.01,digits:3,tick:"0.001 / 5 USD"},
+USOILp:{name:"OIL",contract:1000,quote:"USD",min:.01,max:50,step:.01,digits:3,tick:"0.001 / 1 USD"},
+US100p:{name:"NASDAQ",contract:1,quote:"USD",min:.01,max:600,step:.01,digits:2,tick:"0.01 / 0.01 USD"},
+US30p:{name:"DOW",contract:1,quote:"USD",min:.01,max:400,step:.01,digits:2,tick:"0.01 / 0.01 USD"},
+JP225p:{name:"日経225",contract:1,quote:"JPY",min:.01,max:10000,step:.01,digits:2,tick:"0.01 / 0.01 JPY"},
+US500p:{name:"S&P500",contract:1,quote:"USD",min:.01,max:1500,step:.01,digits:2,tick:"0.01 / 0.01 USD"},
+BTCUSDp:{name:"Bitcoin",contract:1,quote:"USD",min:.01,max:15,step:.01,digits:2,tick:"0.01 / 0.01 USD"},
+ETHUSDp:{name:"Ethereum",contract:1,quote:"USD",min:.01,max:15,step:.01,digits:3,tick:"0.001 / 0.001 USD"}
+});
+const ratePairs={USD:"USDJPY",CAD:"CADJPY",CHF:"CHFJPY",GBP:"GBPJPY",AUD:"AUDJPY"};
+const $=id=>document.getElementById(id);
+const el={accountRange:$("accountRange"),accountNumber:$("accountNumber"),accountText:$("accountText"),accountMinus:$("accountMinus"),accountPlus:$("accountPlus"),risk:$("risk"),riskText:$("riskText"),symbol:$("symbol"),entry:$("entry"),stop:$("stop"),conversionWrap:$("conversionWrap"),conversionLabel:$("conversionLabel"),conversionRate:$("conversionRate"),conversionHelp:$("conversionHelp"),symbolInfo:$("symbolInfo"),lot:$("lot"),targetRisk:$("targetRisk"),actualRisk:$("actualRisk"),distance:$("distance"),actualRiskPct:$("actualRiskPct"),message:$("message")};
+const num=v=>{const n=parseFloat(String(v).replace(/,/g,""));return Number.isFinite(n)?n:NaN};
+const yen=n=>Number.isFinite(n)?Math.round(n).toLocaleString("ja-JP")+"円":"—";
+const floorStep=(n,s)=>Math.floor((n+1e-12)/s)*s;
+const fmtLot=n=>Number.isFinite(n)?n.toFixed(2):"—";
+function clampAccount(v){v=Math.round(v/100)*100;return Math.min(5000,Math.max(500,v))}
+function setAccount(v){v=clampAccount(v);el.accountRange.value=v;el.accountNumber.value=v;el.accountText.textContent=v.toLocaleString("ja-JP");calculate()}
+function accountYen(){return Number(el.accountRange.value)*10000}
+function target(){return accountYen()*num(el.risk.value)/100}
+function setActive(container,value){document.querySelectorAll(`#${container} .chip`).forEach(b=>b.classList.toggle("active",Number(b.dataset.value)===Number(value)))}
+function updateHeader(){const a=Number(el.accountRange.value);el.accountText.textContent=a.toLocaleString("ja-JP");el.accountNumber.value=a;el.riskText.textContent=Number(el.risk.value).toFixed(1).replace(/\.0$/,"");el.targetRisk.textContent=yen(target());setActive("accountQuick",a);setActive("riskQuick",el.risk.value)}
+function updateSymbol(){const s=instruments[el.symbol.value],pair=ratePairs[s.quote];el.symbolInfo.innerHTML=`<span class="spec"><b>${el.symbol.value}</b>｜契約サイズ ${s.contract.toLocaleString()}｜最小 ${s.min}｜最大 ${s.max} lot｜刻み ${s.step}${s.tick?`<br>ティック ${s.tick}`:""}</span>`;if(s.quote==="JPY"){el.conversionWrap.style.display="none";el.conversionRate.value="1"}else{el.conversionWrap.style.display="block";el.conversionLabel.textContent=`${s.quote}→円 換算レート`;el.conversionHelp.textContent=`現在の ${pair||s.quote+"JPY"} を入力してください。`;el.conversionRate.value=localStorage.getItem("fk-rate-"+s.quote)||""}calculate()}
+function calculate(){updateHeader();const s=instruments[el.symbol.value],e=num(el.entry.value),st=num(el.stop.value);if(!Number.isFinite(e)||!Number.isFinite(st)||e===st){el.lot.textContent="—";el.actualRisk.textContent="—";el.distance.textContent="—";el.actualRiskPct.textContent="—";el.message.className="message";el.message.textContent="エントリー価格と損切り価格を入力してください。";return}const d=Math.abs(e-st);let conv=s.quote==="JPY"?1:num(el.conversionRate.value);if(!Number.isFinite(conv)||conv<=0){el.lot.textContent="—";el.actualRisk.textContent="—";el.distance.textContent=d.toFixed(s.digits);el.actualRiskPct.textContent="—";el.message.className="message warning";el.message.textContent=`${s.quote}→円の換算レートを入力してください。`;return}if(s.quote!=="JPY")localStorage.setItem("fk-rate-"+s.quote,String(conv));const perLotJPY=d*s.contract*conv;const raw=target()/perLotJPY;let rec=floorStep(raw,s.step),warn="";if(rec>s.max){rec=s.max;warn=`最大取引数量 ${s.max} lot に制限しています。`}if(rec<s.min){rec=0;warn=`計算上 ${s.min} lot 未満です。`}const actual=perLotJPY*rec;el.lot.textContent=fmtLot(rec);el.actualRisk.textContent=yen(actual);el.distance.textContent=d.toFixed(s.digits);el.actualRiskPct.textContent=rec>0?(actual/accountYen()*100).toFixed(3)+"%":"—";el.message.className=warn?"message warning":"message";el.message.textContent=warn||`計算上 ${raw.toFixed(3)} lot → 0.01刻みで切り捨て。`}
+el.accountRange.addEventListener("input",()=>setAccount(Number(el.accountRange.value)));
+el.accountRange.addEventListener("change",()=>setAccount(Number(el.accountRange.value)));
+el.accountNumber.addEventListener("change",()=>setAccount(Number(el.accountNumber.value)));
+el.accountNumber.addEventListener("blur",()=>setAccount(Number(el.accountNumber.value)));
+el.accountMinus.addEventListener("click",()=>setAccount(Number(el.accountRange.value)-100));
+el.accountPlus.addEventListener("click",()=>setAccount(Number(el.accountRange.value)+100));
+el.risk.addEventListener("input",calculate);
+el.risk.addEventListener("change",calculate);
+el.symbol.addEventListener("change",updateSymbol);
+[el.entry,el.stop,el.conversionRate].forEach(x=>x.addEventListener("input",calculate));
+document.querySelectorAll("#accountQuick .chip").forEach(b=>b.addEventListener("click",()=>setAccount(Number(b.dataset.value))));
+document.querySelectorAll("#riskQuick .chip").forEach(b=>b.addEventListener("click",()=>{el.risk.value=b.dataset.value;calculate()}));
+$("clear").addEventListener("click",()=>{el.entry.value="";el.stop.value="";calculate()});
+$("copy").addEventListener("click",async()=>{const s=instruments[el.symbol.value];const t=`Fintokei｜${s.name}\n口座 ${el.accountText.textContent}万円｜リスク ${el.riskText.textContent}%\n推奨 ${el.lot.textContent} lot\n損失予定 ${el.actualRisk.textContent}`;try{await navigator.clipboard.writeText(t);el.message.textContent="結果をコピーしました。"}catch{el.message.textContent="コピーできませんでした。"}});
+updateSymbol();setAccount(2000);
+})();
+</script>
+</body>
+</html>
