@@ -82,7 +82,7 @@ select:focus,input:focus{border-color:#bd6cff;box-shadow:0 0 0 3px #b965ff22}
 <label for="symbol">銘柄</label>
 <select id="symbol">
 <optgroup label="FX 16通貨">
-<option value="USDJPYp">USDJPY（ドル円）</option><option value="EURUSDp">EURUSD（ユーロドル）</option><option value="GBPUSDp">GBPUSD（ポンドドル）</option><option value="AUDUSDp">AUDUSD（オージードル）</option><option value="USDCADp">USDCAD（ドルカナダ）</option><option value="USDCHFp">USDCHF（ドルスイス）</option><option value="EURJPYp">EURJPY（ユーロ円）</option><option value="GBPJPYp">GBPJPY（ポンド円）</option><option value="AUDJPYp">AUDJPY（オージー円）</option><option value="NZDJPYp">NZDJPY（NZドル円）</option><option value="CADJPYp">CADJPY（カナダ円）</option><option value="CHFJPYp">CHFJPY（スイス円）</option><option value="EURGBPp">EURGBP（ユーロポンド）</option><option value="GBPAUDp">GBPAUD（ポンドオージー）</option><option value="EURCADp">EURCAD（ユーロカナダ）</option><option value="EURAUDp">EURAUD（ユーロオージー）</option>
+<option value="USDJPYp">USDJPY（ドル円）</option><option value="EURUSDp">EURUSD（ユーロドル）</option><option value="GBPUSDp">GBPUSD（ポンドドル）</option><option value="AUDUSDp">AUDUSD（オージードル）</option><option value="USDCADp">USDCAD（ドルカナダ）</option><option value="USDCHFp">USDCHF（ドルスイス）</option><option value="EURJPYp">EURJPY（ユーロ円）</option><option value="GBPJPYp">GBPJPY（ポンド円）</option><option value="AUDJPYp">AUDJPY（オージー円）</option><option value="NZDJPYp">NZDJPY（NZドル円）</option><option value="CADJPYp">CADJPY（カナダ円）</option><option value="CHFJPYp">CHFJPY（スイス円）</option><option value="EURGBPp">EURGBP（ユーロポンド）</option><option value="GBPAUDp">GBPAUD（ポンドオージー）</option><option value="NZDUSDp">NZDUSD（ニュージードル）</option><option value="EURAUDp">EURAUD（ユーロオージー）</option>
 </optgroup>
 <optgroup label="貴金属・原油"><option value="XAUUSDp">GOLD｜XAUUSDp</option><option value="XAGUSDp">SILVER｜XAGUSDp</option><option value="USOILp">OIL｜USOILp</option></optgroup>
 <optgroup label="株価指数"><option value="US100p">NASDAQ｜US100p</option><option value="US30p">DOW｜US30p</option><option value="JP225p">日経225｜JP225p</option><option value="US500p">S&amp;P500｜US500p</option></optgroup>
@@ -108,7 +108,7 @@ select:focus,input:focus{border-color:#bd6cff;box-shadow:0 0 0 3px #b965ff22}
 
 <script>
 (()=>{"use strict";
-const FX={USDJPYp:["USDJPY","JPY"],EURUSDp:["EURUSD","USD"],GBPUSDp:["GBPUSD","USD"],AUDUSDp:["AUDUSD","USD"],USDCADp:["USDCAD","CAD"],USDCHFp:["USDCHF","CHF"],EURJPYp:["EURJPY","JPY"],GBPJPYp:["GBPJPY","JPY"],AUDJPYp:["AUDJPY","JPY"],NZDJPYp:["NZDJPY","JPY"],CADJPYp:["CADJPY","JPY"],CHFJPYp:["CHFJPY","JPY"],EURGBPp:["EURGBP","GBP"],GBPAUDp:["GBPAUD","AUD"],EURCADp:["EURCAD","CAD"],EURAUDp:["EURAUD","AUD"]};
+const FX={USDJPYp:["USDJPY","JPY"],EURUSDp:["EURUSD","USD"],GBPUSDp:["GBPUSD","USD"],AUDUSDp:["AUDUSD","USD"],USDCADp:["USDCAD","CAD"],USDCHFp:["USDCHF","CHF"],EURJPYp:["EURJPY","JPY"],GBPJPYp:["GBPJPY","JPY"],AUDJPYp:["AUDJPY","JPY"],NZDJPYp:["NZDJPY","JPY"],CADJPYp:["CADJPY","JPY"],CHFJPYp:["CHFJPY","JPY"],EURGBPp:["EURGBP","GBP"],GBPAUDp:["GBPAUD","AUD"],NZDUSDp:["NZDUSD","USD"],EURAUDp:["EURAUD","AUD"]};
 const instruments={};
 Object.entries(FX).forEach(([k,v])=>instruments[k]={name:v[0],contract:100000,quote:v[1],min:.01,max:100,step:.01,digits:v[1]==="JPY"?3:5});
 Object.assign(instruments,{
